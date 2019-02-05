@@ -9,6 +9,7 @@ Nordic Blockchain uses .NET Core, as far as the building environment comprises .
 ### Dependencies
 * [Newtonsoft JSON](https://www.newtonsoft.com/json) 
 * [Peer2Net](https://github.com/lontivero/peer2net)
+* [PemUtils](https://github.com/huysentruitw/pem-utils)
 
 ### Compile procedure
 1. Compile "NordicBlockchain"
@@ -19,8 +20,6 @@ Run dotnet on NBService.dll or your custom service application.
 Can be installed on a linux server as service by running 
 
     sudo ./install_as_service.sh > /dev/null && sudo service nordicblockchain start
-    sudo ./master_as_service.sh > /dev/null && sudo service nbmaster start
-
 
 ## Service definition
 
@@ -31,4 +30,3 @@ Multiple parts of the service exist for different purposes.
 |NordicBlockchain|`Library [REQUIRED]`           |Core NB code and mechanics.  |
 |NBService       |`Main Service [REQUIRED]`      |Actual blockchain node service. |
 |NBMaster        |`Cache Service [REQUIRED]`     |Global service for P2P Broadcasting|
-|NBCryptoManager |`Internal Tool`                |Cryptographic tool for key generations|

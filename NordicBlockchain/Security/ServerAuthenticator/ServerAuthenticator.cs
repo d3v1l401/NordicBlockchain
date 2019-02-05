@@ -4,8 +4,7 @@ using System.Text;
 
 namespace Nordic.Security.ServerAuthenticator
 {
-    class ServerAuthenticator
-    {
+    class ServerAuthenticator {
         public static string Sign(string _input) {
             return "";
         }

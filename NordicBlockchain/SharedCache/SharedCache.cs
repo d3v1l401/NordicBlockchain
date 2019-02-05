@@ -22,8 +22,10 @@ namespace Nordic.SharedCache
         }
 
         public void AddAddress(string _ip) {
-            if (!this.IsListed(_ip))
+            if (!this.IsListed(_ip)) {
                 this._cache._cachedAddressList.Add(_ip);
+                this.ForcePackAsNew();
+            }
         }
 
         public void RemoveAddress(string _ip) {
@@ -62,9 +64,8 @@ namespace Nordic.SharedCache
         }
 
         public string ToJson() {
-            this.ForcePackAsNew();
             this.Pack();
-            return JsonConvert.SerializeObject(_cache);
+            return JsonConvert.SerializeObject(_cache, Formatting.Indented);
         }
     }
 }

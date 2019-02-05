@@ -10,20 +10,23 @@ namespace Nordic.Network
 {
     public class Network {
 
-        private string        _bindedIp = string.Empty;
-        private int           _bindedPort = -1;
+        private static string        _bindedIp = "127.0.0.1";
+        private static int           _bindedPort = -1;
 
         private CommunicationManager _communication = null;
         private TcpListener          _listener = null;
 
         public Network(string _ip, int _port) {
-            this._bindedIp = _ip;
-            this._bindedPort = _port;
+            _bindedIp = _ip;
+            _bindedPort = _port;
         }
 
         public void Start() {
             this._listener.Start();
         }
+
+        public static string GetCurrentNodeAddress()
+            => _bindedIp;
 
         public void Stop() {
             // Broadcast disconnect.
@@ -32,13 +35,15 @@ namespace Nordic.Network
         }
 
         public bool Setup() {
-            var _listener = new TcpListener(this._bindedPort);
+            var _listener = new TcpListener(_bindedPort);
 
             if (_listener != null)
                 this._communication = new CommunicationManager(_listener.Cast<TcpListener>());
 
             if (this._communication != null) {
                 this._listener = _listener.Cast<TcpListener>();
+
+                // Add HTTPS handling
                 return true;
             }
 
