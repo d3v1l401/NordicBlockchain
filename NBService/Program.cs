@@ -1,5 +1,6 @@
 ﻿using Nordic.Blockchain;
 using Nordic.Network;
+using Nordic.Network.Client;
 using Nordic.Security;
 using Nordic.Security.Cryptography;
 using Nordic.SharedCache;
@@ -52,11 +53,18 @@ namespace NBService
             RSA _rsa = new RSA(File.ReadAllText("privKey.pem"), File.ReadAllText("pubKey.pem"));
             var _signature = _rsa.Sign("makeAwish");
             var _verify = _rsa.VerifySignature("makeAwish", _signature, null);
+            var _verify2 = _rsa.VerifySignature("makeAwisha", _signature, null);
 
             Console.WriteLine("Signed: " + _signature + "\n\n");
             Console.WriteLine("Verify: " + _verify);
+            Console.WriteLine("Verify fake one: " + _verify2);
 
-            Console.Read();
+            Client cl = new Client();
+            cl.Connect("ws://127.0.0.1:1337/blt");
+            while (true) {
+
+                cl.Send("blt", (char)0x01 + "Hello");
+            }
         }
     }
 }

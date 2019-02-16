@@ -1,28 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Nordic.Exceptions;
 using Nordic.Extensions;
-using Peer2Net;
+using WebSocketSharp;
+using WebSocketSharp.Server;
 
 namespace Nordic.Network
 {
-    public class Network {
+    public class Network : WebSocketBehavior {
 
         private static string        _bindedIp = "127.0.0.1";
         private static int           _bindedPort = -1;
 
-        private CommunicationManager _communication = null;
-        private TcpListener          _listener = null;
+        private WebSocketServer      _server = null;
+        private SessionHandler       _handler = null;
+
+        public Network() {
+            _bindedIp = "127.0.0.1";
+            _bindedPort = 1337;
+        }
 
         public Network(string _ip, int _port) {
             _bindedIp = _ip;
             _bindedPort = _port;
+
+            this._server = new WebSocketServer(string.Format("ws://{0}:{1}", _ip, _port));
+        } 
+
+        public bool Setup() {
+            if (this._server != null) {
+                this._server.AddWebSocketService<Network>("/blt");
+                return true;
+            }
+
+            return false;
         }
 
         public void Start() {
-            this._listener.Start();
+            if (this._server != null)
+                this._server.Start();
         }
 
         public static string GetCurrentNodeAddress()
@@ -31,21 +51,42 @@ namespace Nordic.Network
         public void Stop() {
             // Broadcast disconnect.
             //this._communication.Send(null, null);
-            this._listener.Stop();
+            if (this._server != null)
+                this._server.Stop();
         }
 
-        public bool Setup() {
-            var _listener = new TcpListener(_bindedPort);
+        protected override void OnOpen() {
+            base.OnOpen();
+            
+        }
 
-            if (_listener != null)
-                this._communication = new CommunicationManager(_listener.Cast<TcpListener>());
+        protected override void OnClose(CloseEventArgs e) {
+            base.OnClose(e);
+            
+        }
 
-            if (this._communication != null) {
-                this._listener = _listener.Cast<TcpListener>();
+        protected override void OnError(WebSocketSharp.ErrorEventArgs e) {
+            base.OnError(e);
+            this._handler.OnConnectionFailed(this, e);
+        }
 
-                // Add HTTPS handling
-                return true;
-            }
+        protected override void OnMessage(MessageEventArgs e) {
+            base.OnMessage(e);
+            this._handler.OnPeerDataRecv(this, e);
+        }
+
+        public void Send(byte[] _data, string _to) {
+            //base.SendAsync(_data, null);
+            base.Sessions.SendTo(_data, _to);
+            this._handler.OnPeerDataSent(this, null);
+        }
+
+        public bool Connect(string _ip, int _port) {
+            
+            return false;
+        }
+
+        public bool Disconnect(string _ip, int _port) {
 
             return false;
         }

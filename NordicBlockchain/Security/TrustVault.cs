@@ -33,6 +33,16 @@ namespace Nordic.Security
             return this._vault[_from].VerifySignature(_inputData, _signature, null);
         }
 
+        public void FromJson(string _jsonPayload) {
+            var _filteredCopy = JsonConvert.DeserializeObject<Dictionary<string, string>>(_jsonPayload);
+
+            foreach (var entry in _filteredCopy) 
+                if (!this._vault.ContainsKey(entry.Key))
+                    this._vault.Add(entry.Key, new RSA(null, entry.Value));
+            
+
+        }
+
         public string ToJson() {
             var _filteredCopy = new Dictionary<string, string>();
             foreach (var entry in this._vault)

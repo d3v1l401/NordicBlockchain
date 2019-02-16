@@ -8,7 +8,6 @@ Nordic Blockchain uses .NET Core, as far as the building environment comprises .
 
 ### Dependencies
 * [Newtonsoft JSON](https://www.newtonsoft.com/json) 
-* [Peer2Net](https://github.com/lontivero/peer2net)
 * [PemUtils](https://github.com/huysentruitw/pem-utils)
 
 ### Compile procedure
