@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Nordic.Security.CLM_Manager
 {
@@ -19,9 +20,9 @@ namespace Nordic.Security.CLM_Manager
             this._operation = IOperation.OPERATION_TYPE.OPERATION_NONE;
         }
 
-        public IOperation GetClass() {
+        public async Task<IOperation> GetClass() {
             if (this._rawBuff != null && this._operation != IOperation.OPERATION_TYPE.OPERATION_NONE)
-                return new Deserializer().Process(this._rawBuff, this._operation);
+                return await new Deserializer().Process(this._rawBuff, this._operation);
            
             return null;
         }

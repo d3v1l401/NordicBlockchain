@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Nordic.Security.CLM_Manager
 {
@@ -23,7 +24,7 @@ namespace Nordic.Security.CLM_Manager
                 throw new IllegalStreamOperation("Read string called over an empty memory reader.");
         }
 
-        public IOperation Process(byte[] _buffer, IOperation.OPERATION_TYPE _type) {
+        public async Task<IOperation> Process(byte[] _buffer, IOperation.OPERATION_TYPE _type) {
 
             if (_buffer == null || _buffer.Length < (sizeof(Int32) + Cryptography.Sha256.HASH_SIZE))
                 throw new MalformedCLMPacket("Buffer either null or too small (" + _buffer == null ? "null" : _buffer.Length + ")");
@@ -62,7 +63,7 @@ namespace Nordic.Security.CLM_Manager
             return _rawClass;
         }
 
-        public byte[] Process(IOperation _operation)
+        public async Task<byte[]> Process(IOperation _operation)
          => throw new IllegalStreamOperation("Called serialization process in deserialization class.");
         
     }

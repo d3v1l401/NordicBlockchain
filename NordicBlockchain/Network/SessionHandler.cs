@@ -7,6 +7,7 @@ using Nordic.Security.ServerAuthenticator;
 using WebSocketSharp;
 using Nordic.Security.CLM_Manager;
 using Nordic.Blockchain.Operations;
+using Nordic.Exceptions;
 
 namespace Nordic.Network
 {
@@ -72,8 +73,15 @@ namespace Nordic.Network
             //}
 
             if (e.RawData != null && e.RawData.Length > 0) {
-                ClmManager _clm = new ClmManager(e.RawData);
-                var _class = _clm.GetClass();
+                try {
+                    var _clm = await new ClmManager(e.RawData).GetClass();
+
+
+                } catch (MalformedCLMPacket ex) {
+                    await Console.Out.WriteLineAsync("Malformed packet: " + ex.Message + "\n" + ex.StackTrace);
+                } catch (TamperedClmPacket ex) {
+                    await Console.Out.WriteLineAsync(ex.Message + "\n" + ex.StackTrace);
+                }
                 
             }
         }
