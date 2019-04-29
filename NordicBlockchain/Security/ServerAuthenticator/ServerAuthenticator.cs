@@ -5,12 +5,14 @@ using System.Text;
 
 namespace Nordic.Security.ServerAuthenticator
 {
-    class ServerAuthenticator {
+    public class ServerAuthenticator {
         private static TrustVault _vault = null;
 
         public static void Initialize(string _pathToPubKey, string _pathToPrivKey, string _pathToLocalVault) {
             _vault = new TrustVault(File.ReadAllText(_pathToPrivKey), File.ReadAllText(_pathToPubKey));
-            _vault.FromJson(File.ReadAllText(_pathToLocalVault));
+
+            if (_pathToLocalVault.Length > 0)
+                _vault.FromJson(File.ReadAllText(_pathToLocalVault));
         }
 
         public static string Sign(string _input) {

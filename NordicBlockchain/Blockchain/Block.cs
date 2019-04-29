@@ -9,27 +9,26 @@ namespace Nordic.Blockchain
 {
     public class Block {
         private readonly static int LEDGER_MAX = 500;
-
-        public IList<BlockData> PendingTransactions { get; set; }
+        
         public ulong Index { get; set; }
         public DateTime Timestamp { get; set; }
         public string PrevHash { get; set; }
         public string Hash { get; set; }
+        public string NextHash { get; set; }
         public IList<BlockData> Data { get; set; }
 
         private string CreateHash() {
             Sha256 _sha = new Sha256();
-            _sha.Enqueue(Encoding.ASCII.GetBytes($"{Timestamp.ToString()}{PrevHash.ToString() ?? ""}-{Data.ToString() ?? ""}-{PendingTransactions.ToString() ?? ""}"));
+            _sha.Enqueue(Encoding.ASCII.GetBytes($"{Timestamp.ToString()}{PrevHash.ToString() ?? ""}-{Data.ToString() ?? ""}"));
 
             return _sha.ToString();
         }
 
-        public string RecalculateHash() {
-            return this.CreateHash();
-        }
+        public string RecalculateHash()
+            => this.CreateHash();
 
-        public void AddTransaction(BlockData _tx) 
-            => this.PendingTransactions.Add(_tx);
+        public void AddTransaction(BlockData _tx)
+            => this.Data.Add(_tx);
 
         public bool Add(BlockData _data) {
             // Max entries per block, wait for next block.
@@ -53,7 +52,6 @@ namespace Nordic.Blockchain
                 this.PrevHash = string.Empty;
             
             this.Data = _data;
-            this.PendingTransactions = new List<BlockData>();
             this.Hash = this.CreateHash();
         }
 
@@ -70,7 +68,6 @@ namespace Nordic.Blockchain
                 this.PrevHash = string.Empty;
 
             this.Data = new List<BlockData>();
-            this.PendingTransactions = new List<BlockData>();
             this.Data.Add(_data);
             this.Hash = this.CreateHash();
         }
@@ -78,7 +75,6 @@ namespace Nordic.Blockchain
         public Block(Block _prevBlock) {
 
             this.Data = new List<BlockData>();
-            this.PendingTransactions = new List<BlockData>();
 
             if (_prevBlock == null)
                 this.Index = 0;

@@ -9,6 +9,8 @@ namespace Nordic.Security.Cryptography
 {
     public class Sha256 : IHash {
 
+        public static int HASH_SIZE = 64;
+
         private SHA256 _sha256;
         private List<byte> _buffer;
         public Sha256() {

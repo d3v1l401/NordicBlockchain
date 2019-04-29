@@ -1,8 +1,10 @@
 ﻿using Nordic.Blockchain;
+using Nordic.Blockchain.Operations;
 using Nordic.Network;
 using Nordic.Network.Client;
 using Nordic.Security;
 using Nordic.Security.Cryptography;
+using Nordic.Security.ServerAuthenticator;
 using Nordic.SharedCache;
 using System;
 using System.IO;
@@ -12,6 +14,7 @@ namespace NBService
     class Program
     {
         static void Main(string[] args) {
+            ServerAuthenticator.Initialize("pubKey.pem", "privKey.pem", "");
 
             Console.WriteLine("---------- BLOCKCHAIN ----------\n");
 
@@ -19,9 +22,10 @@ namespace NBService
             var gBlock = _nbStructure.GetBlock(0);
 
             Console.WriteLine(gBlock.ToString());
-            _nbStructure.Add(new BlockData(1, 1, "Lol"));
+            _nbStructure.Add(new BlockData("", IOperation.OPERATION_TYPE.SECURITY_BC_COMPROMISE_NOTICE, "Lol"));
             Console.WriteLine(_nbStructure.LastBlock().ToString());
 
+            Console.WriteLine("Fork Validity: " + _nbStructure.Validity());
 
             Console.WriteLine("\n---------- NODE VAULT ----------\n");
 

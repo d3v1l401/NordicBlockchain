@@ -4,6 +4,25 @@ using System.Text;
 
 namespace Nordic.Exceptions
 {
+    public class TamperedClmPacket : Exception {
+        public TamperedClmPacket(string message) : base(string.Format("---- SECURITY: {0}", message)) {
+
+        }
+    }
+
+    public class MalformedCLMPacket : Exception {
+        public MalformedCLMPacket(string message) : base(message) {
+
+        }
+    }
+
+    public class IllegalStreamOperation : Exception {
+        public IllegalStreamOperation(string message) : base(message)
+        {
+
+        }
+    }
+
     public class UnsupportedProtocolException: Exception {
         public UnsupportedProtocolException(string message) : base(message) {
 

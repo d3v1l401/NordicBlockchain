@@ -5,6 +5,8 @@ using System.IO;
 using Nordic.Extensions;
 using Nordic.Security.ServerAuthenticator;
 using WebSocketSharp;
+using Nordic.Security.CLM_Manager;
+using Nordic.Blockchain.Operations;
 
 namespace Nordic.Network
 {
@@ -69,8 +71,10 @@ namespace Nordic.Network
 
             //}
 
-            using (var sr = new BinaryReader(new MemoryStream(e.RawData))) {
-
+            if (e.RawData != null && e.RawData.Length > 0) {
+                ClmManager _clm = new ClmManager(e.RawData);
+                var _class = _clm.GetClass();
+                
             }
         }
 

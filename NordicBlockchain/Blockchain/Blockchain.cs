@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Nordic.Blockchain.Operations;
+using Nordic.Extensions;
+using Nordic.Security.ServerAuthenticator;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,10 +9,14 @@ namespace Nordic.Blockchain
 {
     public class Blockchain {
         private IList<Block> _chain { set; get; }
+        private IList<BlockData> PendingOperations { get; set; }
 
         public Blockchain() {
+            this.PendingOperations = new List<BlockData>();
             this._chain = new List<Block>();
-            this.Add(new BlockData(0, 0xD3010401, "Nope"));
+
+            this.Add(new BlockData("", IOperation.OPERATION_TYPE.OPERATION_GENESIS_BLOCK, "Nope"));
+            this.ProcessPendingOperation("d3vil401");
         }
 
         public Block LastBlock() {
@@ -43,7 +50,8 @@ namespace Nordic.Blockchain
             return true;
         }
 
-        public bool Validity(ulong _id) => this.Validity(this.GetBlock(_id));
+        public bool Validity(ulong _id) 
+            => this.Validity(this.GetBlock(_id));
 
         public void Add(BlockData _data) {
             Block latestBlock = this.LastBlock();
@@ -60,6 +68,15 @@ namespace Nordic.Blockchain
             }
 
             this._chain.Add(newBlock);
+        }
+
+        public void ProcessPendingOperation(string _minerIdentifier) {
+            this.Add(this.PendingOperations.ToList());
+
+            this.PendingOperations.Clear();
+            var _signature = ServerAuthenticator.Sign(_minerIdentifier);
+
+            this.Add(new BlockData(_minerIdentifier, IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK, _signature));
         }
 
         public void Add(List<BlockData> _data) {
