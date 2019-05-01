@@ -27,15 +27,15 @@ namespace Nordic.Security.CLM_Manager
             return null;
         }
 
-        public byte[] GetBuffer() {
-            return null;
+        public async Task<byte[]> GetBuffer() {
+            return await new Serializer().Process(this._class);
         }
 
         public ClmManager(IOperation _toSerialize)
             => this._class = _toSerialize ?? throw new MalformedCLMPacket("Specified null class to serialize");
 
         public ClmManager(byte[] _toDeserialize) {
-            if (_toDeserialize != null && _toDeserialize.Length >= 0 && _toDeserialize.Length < (sizeof(Int32) - Sha256.HASH_SIZE)) {
+            if (_toDeserialize != null && _toDeserialize.Length >= 0) {
 
                 using (MemoryStream stream = new MemoryStream(_toDeserialize)) {
                     using (BinaryReader reader = new BinaryReader(stream)) {

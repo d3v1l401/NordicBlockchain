@@ -17,7 +17,6 @@ namespace Nordic.Network
         private static int           _bindedPort = -1;
 
         private WebSocketServer      _server = null;
-        private SessionHandler       _handler = null;
 
         public Network() {
             _bindedIp = "127.0.0.1";
@@ -28,13 +27,13 @@ namespace Nordic.Network
             _bindedIp = _ip;
             _bindedPort = _port;
 
-            this._handler = new SessionHandler();
+            SessionHandler.getInstance(); // Force creation
             this._server = new WebSocketServer(string.Format("ws://{0}:{1}", _ip, _port));
         } 
 
         public bool Setup() {
             if (this._server != null) {
-                this._handler = new SessionHandler();
+                SessionHandler.getInstance();
                 this._server.AddWebSocketService<Network>("/blt");
                 return true;
             }
@@ -69,27 +68,20 @@ namespace Nordic.Network
 
         protected override void OnError(WebSocketSharp.ErrorEventArgs e) {
             base.OnError(e);
-            if (this._handler == null)
-                this._handler = new SessionHandler();
 
-            this._handler.OnConnectionFailed(this, e);
+            SessionHandler.getInstance().OnConnectionFailed(this, e);
         }
 
         protected override void OnMessage(MessageEventArgs e) {
             base.OnMessage(e);
-            if (this._handler == null)
-                this._handler = new SessionHandler();
 
-            this._handler.OnPeerDataRecv(this, e);
+            SessionHandler.getInstance().OnPeerDataRecv(this, e);
         }
 
         public void Send(byte[] _data, string _to) {
-
-            if (this._handler == null)
-                this._handler = new SessionHandler();
-            //base.SendAsync(_data, null);
             base.Sessions.SendTo(_data, _to);
-            this._handler.OnPeerDataSent(this, null);
+
+            SessionHandler.getInstance().OnPeerDataSent(this, null);
         }
 
         public bool Connect(string _ip, int _port) {

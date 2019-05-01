@@ -26,7 +26,12 @@ namespace Nordic.Network
 
         public SessionHandler() 
             => _sessions = new Dictionary<System.Net.IPEndPoint, SessionData>();
-        
+
+        private static SessionHandler __instance = null;
+
+        public static SessionHandler getInstance() {
+            return __instance != null ? __instance : new SessionHandler();
+        }
 
         public static bool AddSession(System.Net.IPEndPoint _endPoint, Peer _peer) {
             if (!SessionExists(_endPoint)) {
@@ -61,9 +66,6 @@ namespace Nordic.Network
 
             //}
 
-            using (var sr = new BinaryReader(new MemoryStream(e.RawData))) {
-                
-            }
         }
 
         public async void OnPeerDataRecv(object sender, MessageEventArgs e) {
@@ -74,8 +76,8 @@ namespace Nordic.Network
 
             if (e.RawData != null && e.RawData.Length > 0) {
                 try {
-                    var _clm = await new ClmManager(e.RawData).GetClass();
-
+                    var _class = await new ClmManager(e.RawData).GetClass();
+                    await Blockchain.Blockchain.getInstance().ProcessOperation(_class);
 
                 } catch (MalformedCLMPacket ex) {
                     await Console.Out.WriteLineAsync("Malformed packet: " + ex.Message + "\n" + ex.StackTrace);

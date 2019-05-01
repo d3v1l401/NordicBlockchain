@@ -13,15 +13,14 @@ namespace Nordic.Network.Client
                 WebSocket _websck = new WebSocket(_url);
 
                 _websck.OnMessage += (s, e) => {
-                    if (e.Data[0] == 0x01) {
-                        Console.WriteLine("Hello");
-                    } else {
-                        
-                    }
+                    //if (e.Data[0] == 0x01) {
+                    //    Console.WriteLine("Hello");
+                    //} else {
+                    //    
+                    //}
                 };
 
                 _websck.Connect();
-                _websck.Send("Hi");
                 sessions.Add(_url, _websck);
             }
         }

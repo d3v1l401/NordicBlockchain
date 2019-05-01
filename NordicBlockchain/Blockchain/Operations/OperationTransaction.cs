@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Nordic.Blockchain.Operations
 {
-    class OperationTransaction : IOperation {
+    public class OperationTransaction : IOperation {
         public OperationTransaction(string _author, string _data, string _signature) {
             base.OperationAuthor = _author;
             base.OperationData = _data;

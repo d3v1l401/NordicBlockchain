@@ -1,8 +1,10 @@
 ﻿using Nordic.Blockchain;
 using Nordic.Blockchain.Operations;
+using Nordic.Extensions;
 using Nordic.Network;
 using Nordic.Network.Client;
 using Nordic.Security;
+using Nordic.Security.CLM_Manager;
 using Nordic.Security.Cryptography;
 using Nordic.Security.ServerAuthenticator;
 using Nordic.SharedCache;
@@ -65,9 +67,21 @@ namespace NBService
 
             Client cl = new Client();
             cl.Connect("ws://127.0.0.1:1337/blt");
+            bool _sent = false;
             while (true) {
+                try {
+                    if (!_sent) {
+                        IOperation _op = new OperationTransaction("d3vil401", "none", "none");
+                        ClmManager _clm = new ClmManager(_op);
+                        var _buffer = _clm.GetBuffer().Result;
 
-                cl.Send("blt", (char)0x01 + "Hello");
+                        cl.Send("ws://127.0.0.1:1337/blt", _buffer.ToStringBuffer());
+                        _sent = true;
+                    }
+
+                } catch (Exception ex) {
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
     }

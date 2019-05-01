@@ -4,12 +4,22 @@ using Nordic.Security.ServerAuthenticator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nordic.Blockchain
 {
     public class Blockchain {
         private IList<Block> _chain { set; get; }
         private IList<BlockData> PendingOperations { get; set; }
+
+        private static Blockchain __instance = null;
+
+        public static Blockchain getInstance() {
+            if (__instance != null)
+                return __instance;
+
+            return __instance = new Blockchain();
+        }
 
         public Blockchain() {
             this.PendingOperations = new List<BlockData>();
@@ -68,6 +78,19 @@ namespace Nordic.Blockchain
             }
 
             this._chain.Add(newBlock);
+        }
+
+        public async Task<bool> ProcessOperation(IOperation _operation) {
+
+            new Switch(_operation)
+                .Case<OperationTransaction>(action => {
+
+                    var _data = new BlockData(_operation.GetAuthor(), _operation.GetID(), _operation.GetSignature());
+                    this.PendingOperations.Add(_data);
+
+               });
+
+            return false;
         }
 
         public void ProcessPendingOperation(string _minerIdentifier) {

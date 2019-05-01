@@ -1,6 +1,7 @@
 ﻿using Nordic.Blockchain.Operations;
 using Nordic.Exceptions;
 using Nordic.Extensions;
+using Nordic.Security.Cryptography;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,26 +25,51 @@ namespace Nordic.Security.CLM_Manager
 
         public async Task<byte[]> Process(IOperation _operation) {
             byte[] _rawBuffer = null;
-            IOperation.OPERATION_TYPE _type = _operation.OperationID;
+            byte[] _messageBuffer = null;
+            MemoryStream _memory = null;
+            short _type = (short)_operation.OperationID;
+            var _sizeSoFar = 0;
 
-            new Switch(_operation)
-                .Case<OperationTransaction> (action => {
+            using (_memory = new MemoryStream()) {
+                using (BinaryWriter _writer = new BinaryWriter(_memory)) {
 
-                    using (MemoryStream _memory = new MemoryStream(_rawBuffer)) {
-                        using (BinaryWriter _writer = new BinaryWriter(_memory)) {
+                    // Message buffer
+                    new Switch(_operation)
+                        .Case<OperationTransaction> (action => {
 
-                            _writer.Write(_type.Cast<short>());
+                            _writer.Write(_type);
+                            _sizeSoFar += sizeof(short);
                             this.writeString(_writer, _operation.GetAuthor());
-                            this.writeString(_writer, _operation.GetData().Cast<string>());
+                            _sizeSoFar += _operation.GetAuthor().Length + sizeof(short);
+                            this.writeString(_writer, _operation.GetData().ToStringBuffer());
+                            _sizeSoFar += _operation.GetData().ToStringBuffer().Length + sizeof(short);
                             this.writeString(_writer, _operation.GetSignature());
-                        }
-                    }
+                            _sizeSoFar += _operation.GetSignature().Length + sizeof(short);
 
-                })
-                .Case<OperationNewBlock> (action => {
+                        })
+                        .Case<OperationNewBlock> (action => {
 
 
-                });
+                        });
+
+                    // Write Hash
+                    var _toHash = new byte[_memory.Length];
+                    Array.Copy(_memory.GetBuffer(), sizeof(UInt32), _toHash, 0, _memory.Length);
+                    Sha256 _sha = new Sha256();
+                    _sha.Enqueue(_toHash);
+                    _writer.Write(_sha.Finalize());
+                }
+            }
+
+            // now put size in new buffer
+            using (MemoryStream _final = new MemoryStream()) {
+                using (BinaryWriter _writer = new BinaryWriter(_final)) {
+                    _writer.Write((UInt32)_sizeSoFar);
+                    _writer.Write(_memory.GetBuffer());
+
+                    _rawBuffer = _final.GetBuffer();
+                }
+            }
 
             return _rawBuffer;
         }
