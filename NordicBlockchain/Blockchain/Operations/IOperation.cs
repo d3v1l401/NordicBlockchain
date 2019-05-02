@@ -9,8 +9,8 @@ namespace Nordic.Blockchain.Operations
         // ID assigned to action.
         public enum OPERATION_TYPE {
             TRANSACTION_REQUEST             = 0x1001,
-            TRANSACTION_MANUAL_CONFIRM      = 0x1011,
-            TRANSACTION_MANUAL_REJECT       = 0x1012,
+            //TRANSACTION_MANUAL_CONFIRM      = 0x1011,
+            //TRANSACTION_MANUAL_REJECT       = 0x1012,
             TRANSACTION_MINER_CONFIRM       = 0x1014,
 
             BROADCAST_NEW_BLOCK             = 0x2001,

@@ -39,8 +39,6 @@ namespace Nordic.Security
             foreach (var entry in _filteredCopy) 
                 if (!this._vault.ContainsKey(entry.Key))
                     this._vault.Add(entry.Key, new RSA(null, entry.Value));
-            
-
         }
 
         public string ToJson() {

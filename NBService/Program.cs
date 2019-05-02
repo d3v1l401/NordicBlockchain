@@ -1,5 +1,6 @@
 ﻿using Nordic.Blockchain;
 using Nordic.Blockchain.Operations;
+using Nordic.Configuration;
 using Nordic.Extensions;
 using Nordic.Network;
 using Nordic.Network.Client;
@@ -16,6 +17,11 @@ namespace NBService
     class Program
     {
         static void Main(string[] args) {
+            //if (!ConfigurationHelper.Import("NordicConf.json")) {
+            //    Console.WriteLine("Configuration import failed, using default values and writing configuration file \"NordicConf.json\".");
+            //    ConfigurationHelper.Export("NordicConf.json");
+            //}
+
             ServerAuthenticator.Initialize("pubKey.pem", "privKey.pem", "");
 
             Console.WriteLine("---------- BLOCKCHAIN ----------\n");
@@ -71,7 +77,7 @@ namespace NBService
             while (true) {
                 try {
                     if (!_sent) {
-                        IOperation _op = new OperationTransaction("d3vil401", "none", "none");
+                        IOperation _op = new OperationTransaction("d3vil401", "13.2", "none");
                         ClmManager _clm = new ClmManager(_op);
                         var _buffer = _clm.GetBuffer().Result.ToBase64();
 

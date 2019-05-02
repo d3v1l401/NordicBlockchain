@@ -14,7 +14,7 @@ namespace Nordic.Blockchain
         public DateTime Timestamp { get; set; }
         public string PrevHash { get; set; }
         public string Hash { get; set; }
-        public string NextHash { get; set; }
+        public string NextHash { get; set; } // Enforcing blockchain by double dependency (3 blocks depend on each other) - disabled by default as not implemented.
         public IList<BlockData> Data { get; set; }
 
         private string CreateHash() {
