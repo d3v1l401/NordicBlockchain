@@ -15,9 +15,10 @@ namespace Nordic.Security.CLM_Manager
 
                 var _strSize = _reader.ReadInt16();
 
-                if (_strSize > 0 && _strSize < (Int16.MaxValue - 1))
-                    return _reader.ReadChars(_strSize).Cast<string>();
-                else
+                if (_strSize > 0 && _strSize < (Int16.MaxValue - 1)) {
+                    var _asString = new string(_reader.ReadChars(_strSize));
+                    return _asString;
+                } else
                     throw new MalformedCLMPacket("String size is null or exceeds maximum value.");
 
             } else
@@ -26,7 +27,7 @@ namespace Nordic.Security.CLM_Manager
 
         public async Task<IOperation> Process(byte[] _buffer, IOperation.OPERATION_TYPE _type) {
 
-            if (_buffer == null || _buffer.Length < (sizeof(Int32) + Cryptography.Sha256.HASH_SIZE))
+            if (_buffer == null || _buffer.Length > (UInt32.MaxValue - Cryptography.Sha256.HASH_SIZE))
                 throw new MalformedCLMPacket("Buffer either null or too small (" + _buffer == null ? "null" : _buffer.Length + ")");
 
             IOperation _rawClass = null;
@@ -39,7 +40,7 @@ namespace Nordic.Security.CLM_Manager
                         case IOperation.OPERATION_TYPE.TRANSACTION_REQUEST:
 
                             var _opType = reader.ReadInt16();
-                            if (_opType != IOperation.OPERATION_TYPE.TRANSACTION_REQUEST.Cast<UInt16>())
+                            if (_opType != (short)IOperation.OPERATION_TYPE.TRANSACTION_REQUEST)
                                 throw new MalformedCLMPacket("Requested deserialization of " + typeof(OperationTransaction).ToString() + " but message optype is " + _opType + ".");
 
                             var _author = this.readString(reader);

@@ -12,6 +12,14 @@ namespace Nordic.Extensions
             return Convert.ToBase64String(_array, Base64FormattingOptions.None);
         }
 
+        public static byte[] AsBase64EncodedArray(this byte[] _array) {
+            if (_array.Length == 0)
+                return null;
+
+            var _asString = _array.ToStringBuffer();
+            return Convert.FromBase64String(_asString);
+        }
+
         public static string ToStringBuffer(this byte[] _array) {
             if (_array != null)
                 return Encoding.ASCII.GetString(_array);

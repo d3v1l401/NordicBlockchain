@@ -76,7 +76,11 @@ namespace Nordic.Network
 
             if (e.RawData != null && e.RawData.Length > 0) {
                 try {
+                    // Keep async methods, receival is not dependant on synchrony and can take time.
                     var _class = await new ClmManager(e.RawData).GetClass();
+
+                    Console.WriteLine(_class.ToString());
+
                     await Blockchain.Blockchain.getInstance().ProcessOperation(_class);
 
                 } catch (MalformedCLMPacket ex) {

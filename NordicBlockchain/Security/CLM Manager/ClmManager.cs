@@ -37,14 +37,18 @@ namespace Nordic.Security.CLM_Manager
         public ClmManager(byte[] _toDeserialize) {
             if (_toDeserialize != null && _toDeserialize.Length >= 0) {
 
-                using (MemoryStream stream = new MemoryStream(_toDeserialize)) {
+                using (MemoryStream stream = new MemoryStream(_toDeserialize.AsBase64EncodedArray())) {
                     using (BinaryReader reader = new BinaryReader(stream)) {
+                        
+                        Console.WriteLine(_toDeserialize.AsBase64EncodedArray().HexDump());
 
                         var _messageSize = reader.ReadInt32();
                         if (!(_messageSize > 0) || (_messageSize > (Int32.MaxValue - Sha256.HASH_SIZE)))
                             throw new MalformedCLMPacket("Message size is null or exceeds packet length (" + _messageSize + ").");
 
                         var _messageBuffer = reader.ReadBytes(_messageSize);
+
+                        Console.WriteLine(_messageBuffer.HexDump());
 
                         if (_messageBuffer == null || !(_messageBuffer.Length > 0) || _messageBuffer.Length != _messageSize)
                             throw new MalformedCLMPacket(string.Format("Message size discrepancy from message size {0} != {1}", _messageSize, _messageBuffer == null ? 0 : _messageBuffer.Length));
@@ -56,14 +60,18 @@ namespace Nordic.Security.CLM_Manager
                         _digest.Enqueue(_messageBuffer);
                         var _real = _digest.Finalize();
 
-                        if (!Array.Equals(_digest, _real))
-                            throw new TamperedClmPacket(string.Format("Tampered packet {0} != {1}", _digest.ToString(), _real.ToString()));
+                        if (!_hash.ToBase64().Equals(_real.ToBase64()))
+                            throw new TamperedClmPacket(string.Format("Tampered packet {0} != {1}", _hash.ToBase64(), _real.ToBase64()));
 
                         // Determine message type
 
-                        var _opType = reader.ReadUInt16();
+                        using (MemoryStream streamMessage = new MemoryStream(_messageBuffer)) {
+                            using (BinaryReader readerMessage = new BinaryReader(streamMessage)) {
 
-                        this._operation = IOperation.GetOperationType(_opType);
+                                var _opType = readerMessage.ReadUInt16();
+                                this._operation = IOperation.GetOperationType(_opType);
+                            }
+                        }
 
                         // Stop here, delegate the message to Process()
                         this._rawBuff = _messageBuffer;
@@ -80,6 +88,10 @@ namespace Nordic.Security.CLM_Manager
 
         public override bool Equals(object obj) {
             return base.Equals(obj);
+        }
+
+        public override int GetHashCode() {
+            return base.GetHashCode();
         }
     }
 }

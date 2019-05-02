@@ -26,6 +26,7 @@ namespace Nordic.Security.CLM_Manager
         public async Task<byte[]> Process(IOperation _operation) {
             byte[] _rawBuffer = null;
             byte[] _messageBuffer = null;
+            byte[] _selectedRangeBuffer = null;
             MemoryStream _memory = null;
             short _type = (short)_operation.OperationID;
             var _sizeSoFar = 0;
@@ -41,8 +42,8 @@ namespace Nordic.Security.CLM_Manager
                             _sizeSoFar += sizeof(short);
                             this.writeString(_writer, _operation.GetAuthor());
                             _sizeSoFar += _operation.GetAuthor().Length + sizeof(short);
-                            this.writeString(_writer, _operation.GetData().ToStringBuffer());
-                            _sizeSoFar += _operation.GetData().ToStringBuffer().Length + sizeof(short);
+                            this.writeString(_writer, _operation.OperationData);
+                            _sizeSoFar += _operation.OperationData.Length + sizeof(short);
                             this.writeString(_writer, _operation.GetSignature());
                             _sizeSoFar += _operation.GetSignature().Length + sizeof(short);
 
@@ -54,7 +55,8 @@ namespace Nordic.Security.CLM_Manager
 
                     // Write Hash
                     var _toHash = new byte[_memory.Length];
-                    Array.Copy(_memory.GetBuffer(), sizeof(UInt32), _toHash, 0, _memory.Length);
+                    Array.Copy(_memory.GetBuffer(), 0, _toHash, 0, _memory.Length);
+
                     Sha256 _sha = new Sha256();
                     _sha.Enqueue(_toHash);
                     _writer.Write(_sha.Finalize());
@@ -68,10 +70,14 @@ namespace Nordic.Security.CLM_Manager
                     _writer.Write(_memory.GetBuffer());
 
                     _rawBuffer = _final.GetBuffer();
+
+
+                    _selectedRangeBuffer = new byte[_sizeSoFar + sizeof(UInt32) + Cryptography.Sha256.HASH_SIZE];
+                    Array.Copy(_rawBuffer, _selectedRangeBuffer, _selectedRangeBuffer.Length);
                 }
             }
 
-            return _rawBuffer;
+            return _selectedRangeBuffer;
         }
     }
 }

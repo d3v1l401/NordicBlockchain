@@ -73,9 +73,9 @@ namespace NBService
                     if (!_sent) {
                         IOperation _op = new OperationTransaction("d3vil401", "none", "none");
                         ClmManager _clm = new ClmManager(_op);
-                        var _buffer = _clm.GetBuffer().Result;
+                        var _buffer = _clm.GetBuffer().Result.ToBase64();
 
-                        cl.Send("ws://127.0.0.1:1337/blt", _buffer.ToStringBuffer());
+                        cl.Send("ws://127.0.0.1:1337/blt", _buffer);
                         _sent = true;
                     }
 

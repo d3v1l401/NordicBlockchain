@@ -26,7 +26,7 @@ namespace Nordic.Blockchain
             this._chain = new List<Block>();
 
             this.Add(new BlockData("", IOperation.OPERATION_TYPE.OPERATION_GENESIS_BLOCK, "Nope"));
-            this.ProcessPendingOperation("d3vil401");
+            //this.ProcessPendingOperation("d3vil401");
         }
 
         public Block LastBlock() {
@@ -85,7 +85,7 @@ namespace Nordic.Blockchain
             new Switch(_operation)
                 .Case<OperationTransaction>(action => {
 
-                    var _data = new BlockData(_operation.GetAuthor(), _operation.GetID(), _operation.GetSignature());
+                    var _data = new BlockData(_operation);
                     this.PendingOperations.Add(_data);
 
                });
