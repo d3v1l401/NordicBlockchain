@@ -1,4 +1,5 @@
 ﻿using Nordic.Extensions;
+using Nordic.Security.CLM_Manager;
 using SuperSocket.ClientEngine;
 using System;
 using System.Collections.Generic;
@@ -9,15 +10,35 @@ namespace Nordic.Network.Client
 {
     public class Client {
         private IDictionary<string, WebSocket> sessions = new Dictionary<string, WebSocket>();
+        private string _authToken = string.Empty;
+
+        public string GetToken()
+            => this._authToken;
 
         private void OnMessage(object sender, DataReceivedEventArgs e) {
 
             Console.WriteLine(e.Data.HexDump());
+
+            var _op = new ClmManager(e.Data);
+            var _class = _op.GetClass();
+
+            switch (_class.Result.GetID()) {
+                case Blockchain.Operations.IOperation.OPERATION_TYPE.AUTHENTICATE_RESPONSE:
+
+                    this._authToken = _class.Result.OperationData;
+
+                break;
+                default:
+
+                    Console.WriteLine("Unknown packet received for client: " + _class.Result.GetID());
+
+                break;
+            }
         }
 
+        // Override default receive event to data only.
         private void OnMessageAsString(object sender, MessageReceivedEventArgs e) {
-            Console.WriteLine(e.Message.ToByteArray().HexDump());
-
+            this.OnMessage(sender, new DataReceivedEventArgs(e.Message.ToByteArrayUTF()));
         }
 
         protected void OnError(object sender, ErrorEventArgs e) {

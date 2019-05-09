@@ -95,11 +95,13 @@ namespace Nordic.Blockchain
                 })
                .Case<OperationAuthRequest>(action => {
 
+                   
+
                    using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider()) {
                        byte[] val = new byte[32];
                        crypto.GetBytes(val);
                        var seed = BitConverter.ToInt64(val, 1);
-                       var _resp = new ClmManager(new OperationAuthRequest("1", seed.ToString(), ServerAuthenticator.Sign(seed.ToString())));
+                       var _resp = new ClmManager(new OperationAuthAck("1", seed.ToString(), ServerAuthenticator.Sign(seed.ToString())));
                        _responseBuffer = _resp.GetBuffer().Result.ToBase64();
                    }
 

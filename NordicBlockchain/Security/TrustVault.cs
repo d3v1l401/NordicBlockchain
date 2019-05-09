@@ -24,13 +24,22 @@ namespace Nordic.Security
             return this._vault[CURRENT_NODE_IDENTIFIER].Sign(_inputData);
         }
 
+        public bool Add(string _identifier, string _pubKey) {
+            if (!this._vault.ContainsKey(_identifier))
+                this._vault[_identifier] = new RSA(null, _pubKey);
+            else
+                return false;
+
+            return this._vault[_identifier] != null ? true : false;
+        }
+
         public bool Verify(string _inputData, string _signature, string _from) {
             if (!this._vault.ContainsKey(_from))
                 throw new VaultEntryNotFound(_from);
 
             // null => referring to the same RSA instance of such item, in this case the vault _from
             // not null => verify signature against a specific public key
-            return this._vault[_from].VerifySignature(_inputData, _signature, null);
+            return this._vault[_from].VerifySignature(_inputData, _signature, this._vault[_from].GetPublicKey());
         }
 
         public void FromJson(string _jsonPayload) {

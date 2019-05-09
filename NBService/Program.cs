@@ -5,6 +5,7 @@ using Nordic.Extensions;
 using Nordic.Network;
 using Nordic.Network.Client;
 using Nordic.Security;
+using Nordic.Security.ClientAuthenticator;
 using Nordic.Security.CLM_Manager;
 using Nordic.Security.Cryptography;
 using Nordic.Security.ServerAuthenticator;
@@ -24,8 +25,11 @@ namespace NBService
             //    Console.WriteLine("Configuration import failed, using default values and writing configuration file \"NordicConf.json\".");
             //    ConfigurationHelper.Export("NordicConf.json");
             //}
+            var _hardcodedChallenge = "miner_test";
 
             ServerAuthenticator.Initialize("pubKey.pem", "privKey.pem", "");
+            ClientAuthenticator.Initialize("pubKey.pem", "privKey.pem", "");
+            ClientAuthenticator.Add(_hardcodedChallenge, File.ReadAllText("miner_pubKey.pem"));
 
             Console.WriteLine("---------- BLOCKCHAIN ----------\n");
 

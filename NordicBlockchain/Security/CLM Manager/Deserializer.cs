@@ -75,6 +75,22 @@ namespace Nordic.Security.CLM_Manager
 
                             _rawClass = new OperationAuthRequest(_author, _data, _signature);
 
+                            if (!ClientAuthenticator.ClientAuthenticator.Verify(_signature, _author.ToByteArray().ToBase64(), "miner_test"))
+                                return null;
+
+                            break;
+                        case IOperation.OPERATION_TYPE.AUTHENTICATE_RESPONSE:
+
+                            _opType = reader.ReadInt16();
+                            if (_opType != (short)IOperation.OPERATION_TYPE.AUTHENTICATE_RESPONSE)
+                                throw new MalformedCLMPacket("Requested deserialization of " + typeof(OperationAuthAck).ToString() + " but message optype is " + _opType + ".");
+
+                            _author = this.readString(reader);
+                            _data = this.readString(reader);
+                            _signature = this.readString(reader);
+
+                            _rawClass = new OperationAuthAck(_author, _data, _signature);
+
                             break;
                         default:
                             throw new IllegalStreamOperation(string.Format("Unknown packet type {0}", _type));

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,7 +37,7 @@ namespace Nordic.Network
             SessionHandler.getInstance(); // Force creation
 
             this._server = new WebSocketServer(string.Format("ws://{0}:{1}", _ip, _port));
-            //this._server.SslConfiguration.ServerCertificate = new X509Certificate2(__certificatePath, __certificatePassword);
+            this._server.SslConfiguration.ServerCertificate = new X509Certificate2(__certificatePath, __certificatePassword);
         } 
 
         public bool Setup() {
@@ -68,6 +69,9 @@ namespace Nordic.Network
             base.OnOpen();
 
             _knownEndpoints[Context.UserEndPoint.ToString()] = Guid.NewGuid().ToString("N");
+
+            //if (!_knownEndpoints[Context.UserEndPoint.ToString()].Contains(":" + this._server.Port))
+            //    Send(_knownEndpoints[Context.UserEndPoint.ToString()]);
         }
 
         protected override void OnClose(CloseEventArgs e) {
