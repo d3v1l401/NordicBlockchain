@@ -37,9 +37,11 @@ namespace Nordic.Security.CLM_Manager
         public ClmManager(byte[] _toDeserialize) {
             if (_toDeserialize != null && _toDeserialize.Length >= 0) {
 
+
                 using (MemoryStream stream = new MemoryStream(_toDeserialize.AsBase64EncodedArray())) {
                     using (BinaryReader reader = new BinaryReader(stream)) {
                         
+                        //  ----------------- TO REMOVE BEFORE PRODUCTION
                         Console.WriteLine(_toDeserialize.AsBase64EncodedArray().HexDump());
 
                         var _messageSize = reader.ReadInt32();
@@ -47,8 +49,6 @@ namespace Nordic.Security.CLM_Manager
                             throw new MalformedCLMPacket("Message size is null or exceeds packet length (" + _messageSize + ").");
 
                         var _messageBuffer = reader.ReadBytes(_messageSize);
-
-                        Console.WriteLine(_messageBuffer.HexDump());
 
                         if (_messageBuffer == null || !(_messageBuffer.Length > 0) || _messageBuffer.Length != _messageSize)
                             throw new MalformedCLMPacket(string.Format("Message size discrepancy from message size {0} != {1}", _messageSize, _messageBuffer == null ? 0 : _messageBuffer.Length));

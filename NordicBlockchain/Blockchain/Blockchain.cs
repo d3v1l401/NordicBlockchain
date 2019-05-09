@@ -4,7 +4,10 @@ using Nordic.Security.ServerAuthenticator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Nordic.Security.CLM_Manager;
+using Nordic.Extensions;
 
 namespace Nordic.Blockchain
 {
@@ -80,7 +83,8 @@ namespace Nordic.Blockchain
             this._chain.Add(newBlock);
         }
 
-        public async Task<bool> ProcessOperation(IOperation _operation) {
+        public async Task<string> ProcessOperation(IOperation _operation) {
+            var _responseBuffer = string.Empty;
 
             new Switch(_operation)
                 .Case<OperationTransaction>(action => {
@@ -88,9 +92,21 @@ namespace Nordic.Blockchain
                     var _data = new BlockData(_operation);
                     this.PendingOperations.Add(_data);
 
+                })
+               .Case<OperationAuthRequest>(action => {
+
+                   using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider()) {
+                       byte[] val = new byte[32];
+                       crypto.GetBytes(val);
+                       var seed = BitConverter.ToInt64(val, 1);
+                       var _resp = new ClmManager(new OperationAuthRequest("1", seed.ToString(), ServerAuthenticator.Sign(seed.ToString())));
+                       _responseBuffer = _resp.GetBuffer().Result.ToBase64();
+                   }
+
+
                });
 
-            return false;
+            return _responseBuffer != null ? _responseBuffer : string.Empty;
         }
 
         public void ProcessPendingOperation(string _minerIdentifier) {

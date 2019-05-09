@@ -15,6 +15,10 @@ namespace Nordic.Security.CLM_Manager
 
                 var _strSize = _reader.ReadInt16();
 
+                // If empty string, leave it empty.
+                if (_strSize == 0)
+                    return "";
+
                 if (_strSize > 0 && _strSize < (Int16.MaxValue - 1)) {
                     var _asString = new string(_reader.ReadChars(_strSize));
                     return _asString;
@@ -35,17 +39,22 @@ namespace Nordic.Security.CLM_Manager
             using (MemoryStream stream = new MemoryStream(_buffer)) {
                 using (BinaryReader reader = new BinaryReader(stream)) {
                     // Unpack data by type
+                    var _opType = (short)0;
+                    var _author = "";
+                    var _data = "";
+                    var _signature = "";
+
                     switch (_type) {
 
                         case IOperation.OPERATION_TYPE.TRANSACTION_REQUEST:
 
-                            var _opType = reader.ReadInt16();
+                            _opType = reader.ReadInt16();
                             if (_opType != (short)IOperation.OPERATION_TYPE.TRANSACTION_REQUEST)
                                 throw new MalformedCLMPacket("Requested deserialization of " + typeof(OperationTransaction).ToString() + " but message optype is " + _opType + ".");
 
-                            var _author = this.readString(reader);
-                            var _data = this.readString(reader);
-                            var _signature = this.readString(reader);
+                            _author     = this.readString(reader);
+                            _data       = this.readString(reader);
+                            _signature  = this.readString(reader);
 
                             _rawClass = new OperationTransaction(_author, _data, _signature);
 
@@ -53,6 +62,18 @@ namespace Nordic.Security.CLM_Manager
                         case IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK:
 
                             // TODO
+                            break;
+                        case IOperation.OPERATION_TYPE.AUTHENTICATE_REQUEST:
+
+                            _opType = reader.ReadInt16();
+                            if (_opType != (short)IOperation.OPERATION_TYPE.AUTHENTICATE_REQUEST)
+                                throw new MalformedCLMPacket("Requested deserialization of " + typeof(OperationAuthRequest).ToString() + " but message optype is " + _opType + ".");
+
+                            _author = this.readString(reader);
+                            _data = this.readString(reader);
+                            _signature = this.readString(reader);
+
+                            _rawClass = new OperationAuthRequest(_author, _data, _signature);
 
                             break;
                         default:

@@ -13,10 +13,10 @@ namespace NordicTester
         [Fact]
         public void TestRSA()
         {
-            Assert.True(File.Exists("../pubKey.pem"), "Public key does not exist.");
-            Assert.True(File.Exists("../privKey.pem"), "Private key does not exist.");
+            Assert.True(File.Exists("pubKey.pem"), "Public key does not exist.");
+            Assert.True(File.Exists("privKey.pem"), "Private key does not exist.");
 
-            RSA _rsa = new RSA(File.ReadAllText("../privKey.pem"), File.ReadAllText("../pubKey.pem"));
+            RSA _rsa = new RSA(File.ReadAllText("privKey.pem"), File.ReadAllText("pubKey.pem"));
             var _signature = _rsa.Sign("makeAwish");
             var _verify = _rsa.VerifySignature("makeAwish", _signature, null);
             var _verify2 = _rsa.VerifySignature("makeAwisha", _signature, null);

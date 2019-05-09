@@ -48,6 +48,18 @@ namespace Nordic.Security.CLM_Manager
                             _sizeSoFar += _operation.GetSignature().Length + sizeof(short);
 
                         })
+                        .Case<OperationAuthRequest> (action => {
+
+                            _writer.Write(_type);
+                            _sizeSoFar += sizeof(short);
+                            this.writeString(_writer, _operation.GetAuthor());
+                            _sizeSoFar += _operation.GetAuthor().Length + sizeof(short);
+                            this.writeString(_writer, _operation.OperationData);
+                            _sizeSoFar += _operation.OperationData.Length + sizeof(short);
+                            this.writeString(_writer, _operation.GetSignature());
+                            _sizeSoFar += _operation.GetSignature().Length + sizeof(short);
+
+                        })
                         .Case<OperationNewBlock> (action => {
 
 

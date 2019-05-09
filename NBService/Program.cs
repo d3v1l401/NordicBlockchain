@@ -11,9 +11,12 @@ using Nordic.Security.ServerAuthenticator;
 using Nordic.SharedCache;
 using System;
 using System.IO;
+using WebSocketSharp;
+using WebSocketSharp.Server;
 
 namespace NBService
 {
+
     class Program
     {
         static void Main(string[] args) {
@@ -75,19 +78,19 @@ namespace NBService
             cl.Connect("ws://127.0.0.1:1337/blt");
             bool _sent = false;
             while (true) {
-                try {
-                    if (!_sent) {
-                        IOperation _op = new OperationTransaction("d3vil401", "13.2", "none");
-                        ClmManager _clm = new ClmManager(_op);
-                        var _buffer = _clm.GetBuffer().Result.ToBase64();
-
-                        cl.Send("ws://127.0.0.1:1337/blt", _buffer);
-                        _sent = true;
-                    }
-
-                } catch (Exception ex) {
-                    Console.WriteLine(ex.Message);
-                }
+                //try {
+                //    if (!_sent) {
+                //        IOperation _op = new OperationTransaction("d3vil401", "13.2", "none");
+                //        ClmManager _clm = new ClmManager(_op);
+                //        var _buffer = _clm.GetBuffer().Result.ToBase64();
+                //
+                //        cl.Send("ws://127.0.0.1:1337/blt", _buffer);
+                //        _sent = true;
+                //    }
+                //
+                //} catch (Exception ex) {
+                //    Console.WriteLine(ex.Message);
+                //}
             }
         }
     }

@@ -8,6 +8,8 @@ using WebSocketSharp;
 using Nordic.Security.CLM_Manager;
 using Nordic.Blockchain.Operations;
 using Nordic.Exceptions;
+using Nordic.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Nordic.Network
 {
@@ -59,7 +61,7 @@ namespace Nordic.Network
         public static bool SessionExists(System.Net.IPEndPoint _endPoint)
             => _sessions.ContainsKey(_endPoint);
 
-        public async void OnPeerDataSent(object sender, MessageEventArgs e) {
+        public async void OnPeerDataSent(Network sender, MessageEventArgs e) {
             
             // Identify author
             //if (SessionExists(e.Peer.EndPoint)) {
@@ -68,9 +70,9 @@ namespace Nordic.Network
 
         }
 
-        public async void OnPeerDataRecv(object sender, MessageEventArgs e) {
+        public async Task<string> OnPeerDataRecv(Network sender, MessageEventArgs e) {
             // Identify author
-            //if (SessionExists(e.Peer.EndPoint)) {
+            //if (SessionExists(sender.Context.)) {
 
             //}
 
@@ -81,15 +83,16 @@ namespace Nordic.Network
 
                     Console.WriteLine(_class.ToString());
 
-                    await Blockchain.Blockchain.getInstance().ProcessOperation(_class);
+                    return await Blockchain.Blockchain.getInstance().ProcessOperation(_class);
 
                 } catch (MalformedCLMPacket ex) {
                     await Console.Out.WriteLineAsync("Malformed packet: " + ex.Message + "\n" + ex.StackTrace);
                 } catch (TamperedClmPacket ex) {
                     await Console.Out.WriteLineAsync(ex.Message + "\n" + ex.StackTrace);
                 }
-                
+
             }
+            return null;
         }
 
         public async void OnConnectionFailed(object sender, WebSocketSharp.ErrorEventArgs e) {
@@ -103,6 +106,8 @@ namespace Nordic.Network
             //    // Authenticate please.
                 
             //}
+
+            
         }
 
         public async void OnNodeDisconnected(object sender, CloseEventArgs e) {

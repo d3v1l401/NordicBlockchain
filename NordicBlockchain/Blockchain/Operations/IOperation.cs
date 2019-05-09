@@ -20,6 +20,12 @@ namespace Nordic.Blockchain.Operations
 
             OPERATION_GENESIS_BLOCK         = 0xD301,
 
+            AUTHENTICATE_REQUEST            = 0x5001,
+            AUTHENTICATE_RESPONSE           = 0x5002,
+
+            PENDING_OPERATION_REQ           = 0x6001,
+            PENDING_OPERATION_ACK           = 0x6002,
+
             OPERATION_NONE                  = 0xFFFF - 1
         };
 
@@ -43,7 +49,18 @@ namespace Nordic.Blockchain.Operations
                 .Case<OperationTransaction>
                     (action => { _opType.OperationID = OPERATION_TYPE.TRANSACTION_REQUEST; })
                 .Case<OperationNewBlock>
-                    (action => { _opType.OperationID = OPERATION_TYPE.BROADCAST_NEW_BLOCK; });
+                    (action => { _opType.OperationID = OPERATION_TYPE.BROADCAST_NEW_BLOCK; })
+                .Case<OperationAuthRequest>
+                    (action => { _opType.OperationID = OPERATION_TYPE.AUTHENTICATE_REQUEST; })
+                .Case<OperationConfirmTx>
+                    (action => { _opType.OperationID = OPERATION_TYPE.TRANSACTION_MINER_CONFIRM; })
+                .Case<OperationPendingRequest>
+                    (action => { _opType.OperationID = OPERATION_TYPE.PENDING_OPERATION_REQ; })
+                .Case<OperationPendingTicket>
+                    (action => { _opType.OperationID = OPERATION_TYPE.PENDING_OPERATION_ACK; })
+                .Case<OperationAuthAck>
+                    (action => { _opType.OperationID = OPERATION_TYPE.AUTHENTICATE_RESPONSE; });
+
     }
 }
 
