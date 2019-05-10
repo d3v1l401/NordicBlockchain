@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Nordic.Security.CLM_Manager;
 using Nordic.Extensions;
+using Newtonsoft.Json;
 
 namespace Nordic.Blockchain
 {
@@ -29,7 +30,7 @@ namespace Nordic.Blockchain
             this.PendingOperations = new List<BlockData>();
             this._chain = new List<Block>();
 
-            this.Add(new BlockData("", IOperation.OPERATION_TYPE.OPERATION_GENESIS_BLOCK, "Nope"));
+            this.AddSingle(new BlockData("", IOperation.OPERATION_TYPE.OPERATION_GENESIS_BLOCK, "Nope"));
             __instance = this;
             //this.ProcessPendingOperation("d3vil401");
         }
@@ -68,21 +69,11 @@ namespace Nordic.Blockchain
         public bool Validity(ulong _id) 
             => this.Validity(this.GetBlock(_id));
 
-        public void Add(BlockData _data) {
-            Block latestBlock = this.LastBlock();
-            var newBlock = new Block(DateTime.Now, this.LastBlock(), _data);
+        public void AddSingle(BlockData _data) {
+            var _list = new List<BlockData>();
+            _list.Add(_data);
 
-            if (latestBlock != null)
-            {
-                newBlock.Index = latestBlock.Index + 1;
-                newBlock.PrevHash = latestBlock.Hash;
-            } else {
-                // TODO: GENESIS-ONLY ENFORCE!
-                newBlock.Index = 0;
-                newBlock.PrevHash = string.Empty;
-            }
-
-            this._chain.Add(newBlock);
+            this.Add(_list);
         }
 
         public async Task<bool> Vote(string _txId) {
@@ -126,6 +117,14 @@ namespace Nordic.Blockchain
                        _responseBuffer = _resp.GetBuffer().Result.ToBase64();
                    }
                })
+               .Case<OperationStatsRequest> (action =>
+               {
+
+                   var data = (this.LastBlock().ToString() + "|" + this.PendingOperations.Count).Compress().ToByteArray().ToBase64();
+                   var _resp = new ClmManager(new OperationStatsAck("node_test", data, "none"));
+                   _responseBuffer = _resp.GetBuffer().Result.ToBase64();
+
+               })
                .Case<OperationPendingRequest>(action => {
 
                    // This is for testing purpose, we force a pending transaction
@@ -157,10 +156,15 @@ namespace Nordic.Blockchain
         public bool ConfirmTransaction(string _txId) {
             foreach (var tx in this.PendingOperations) {
                 if (tx._operation.GetID() == IOperation.OPERATION_TYPE.TRANSACTION_REQUEST && tx._operation.Cast<OperationTransaction>().GetIdentifier().Equals(_txId)) {
+                    // Too many transactions, new block required.
+                    if (this.LastBlock().IsMaxLedger()) {
+                        this.AddSingle(null);
+                    }
+
                     this.LastBlock().AddTransaction(tx);
 
                     this._votemap[_txId] = null;
-                    this.PendingOperations.Remove(tx);
+
                     return true;
                 }
             }
@@ -175,6 +179,7 @@ namespace Nordic.Blockchain
             if (latestBlock != null) {
                 newBlock.Index = latestBlock.Index + 1;
                 newBlock.PrevHash = latestBlock.Hash;
+                latestBlock.UpdateHash();
             } else {
                 newBlock.Index = 0;
                 newBlock.PrevHash = string.Empty;
@@ -182,5 +187,8 @@ namespace Nordic.Blockchain
             
             this._chain.Add(newBlock);
         }
+
+        public override string ToString()
+            => JsonConvert.SerializeObject(this._chain.ToList(), Formatting.Indented);
     }
 }

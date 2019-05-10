@@ -8,13 +8,14 @@ using System.Text;
 namespace Nordic.Blockchain
 {
     public class Block {
-        private readonly static int LEDGER_MAX = 500;
+        // For debug purpose I'm forcing to 1 transaction per block, to check automated creation of blocks
+        private readonly static int LEDGER_MAX = 1; //500;
         
         public ulong Index { get; set; }
         public DateTime Timestamp { get; set; }
         public string PrevHash { get; set; }
         public string Hash { get; set; }
-        public string NextHash { get; set; } // Enforcing blockchain by double dependency (3 blocks depend on each other) - disabled by default as not implemented.
+        //public string NextHash { get; set; } // Enforcing blockchain by double dependency (3 blocks depend on each other) - disabled by default as not implemented.
         public IList<BlockData> Data { get; set; }
 
         private string CreateHash() {
@@ -23,6 +24,9 @@ namespace Nordic.Blockchain
 
             return _sha.ToString();
         }
+
+        public void UpdateHash()
+            => this.Hash = this.CreateHash();
 
         public string RecalculateHash()
             => this.CreateHash();
@@ -36,6 +40,7 @@ namespace Nordic.Blockchain
                 return false;
 
             this.Data.Add(_data);
+            this.UpdateHash();
             return true;
         }
 
@@ -86,6 +91,9 @@ namespace Nordic.Blockchain
             
 
         }
+
+        public bool IsMaxLedger()
+            => this.Data.Count >= LEDGER_MAX ? true : false;
 
         public override string ToString() {
             return JsonConvert.SerializeObject(this, Formatting.Indented);

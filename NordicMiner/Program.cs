@@ -98,21 +98,24 @@ namespace NordicMiner
                 return;
             }
 
+
             Console.WriteLine("Asking for something to do...");
-            // Request a pending operation
+            // Request a pending operation (transaction), process it and report to node.
             _clm = new ClmManager(new OperationPendingRequest(_hardcodedChallenge, ClientAuthenticator.GetPubKey(), ClientAuthenticator.Sign(_hardcodedChallenge)));
             _buff = _clm.GetBuffer().Result.ToBase64();
             _client.Send(_defaultEndpoint, _buff);
 
-            // Recover pending transaction
-            
 
-            // Perform checks & confirm if fine.
-            IOperation _op = new OperationConfirmTx("", "", "");
+            await Task.Delay(5000);
 
-            //_client.Send(_defaultEndpoint, "");
 
-            // Send notification to the dedicated node for this Tx.
+            // Impersonate administrator, ask for statistics (last block)
+            _clm = new ClmManager(new OperationStatsRequest("admin_test", "", ""));
+            _buff = _clm.GetBuffer().Result.ToBase64();
+            _client.Send(_defaultEndpoint, _buff);
+
+
+            await Task.Delay(2000000);
 
             Console.ReadLine();
         }

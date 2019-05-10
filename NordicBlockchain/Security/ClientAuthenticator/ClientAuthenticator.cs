@@ -27,8 +27,8 @@ namespace Nordic.Security.ClientAuthenticator
             _vault.Add(_identifier, _pubKey);
         }
 
-        public static bool Verify(string _input, string _orData, string _from) {
-            return _vault.Verify(_input, _orData, _from);
+        public static bool Verify(string _input, string _signature, string _from) {
+            return _vault.Verify(_input, _signature, _from);
         }
     }
 }

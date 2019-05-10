@@ -22,12 +22,13 @@ namespace NBService
     class Program
     {
         static ConsoleKeyInfo cki = new ConsoleKeyInfo();
-        private static bool WaitOrBreak(Block chain)
-        {
+        private static bool WaitOrBreak(Block chain) {
             if (Console.KeyAvailable) cki = Console.ReadKey(true);
             if (cki.Key == ConsoleKey.Spacebar) {
                 while (Console.KeyAvailable == false) {
                     Thread.Sleep(250);
+
+                    Console.WriteLine(Blockchain.getInstance().ToString());
                     Console.WriteLine(chain.ToString());
                 }
                 Console.WriteLine();
@@ -56,6 +57,7 @@ namespace NBService
 
             Console.WriteLine(gBlock.ToString());
             //_nbStructure.Add(new BlockData("", IOperation.OPERATION_TYPE.SECURITY_BC_COMPROMISE_NOTICE, "Lol"));
+            
             Console.WriteLine(_nbStructure.LastBlock().ToString());
 
             Console.WriteLine("Fork Validity: " + _nbStructure.Validity());
@@ -101,6 +103,11 @@ namespace NBService
             bool _sent = false;
             while (true) {
                 if (WaitOrBreak(_nbStructure.LastBlock())) break;
+
+                if (!_nbStructure.Validity()) {
+                    Console.WriteLine("Blockchain violation detected!");
+                    break;
+                }
                 //try {
                 //    if (!_sent) {
                 //        IOperation _op = new OperationTransaction("d3vil401", "13.2", "none");

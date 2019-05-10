@@ -6,11 +6,10 @@ using System.Text;
 
 namespace Nordic.Blockchain.Operations
 {
-    public class OperationStatsRequest : IOperation
-    {
+    public class OperationStatsAck : IOperation {
         private string _txIdentifier = string.Empty;
 
-        public OperationStatsRequest(string _author, string _data, string _signature) {
+        public OperationStatsAck(string _author, string _data, string _signature) {
             base.OperationAuthor = _author;
             base.OperationData = _data;
             base.Signature = _signature;

@@ -41,6 +41,17 @@ namespace Nordic.Network.Client
                     sender.Send(_result);
 
                     break;
+                case IOperation.OPERATION_TYPE.OPERATION_STATS_ACK:
+
+                    var stats = _class.Result.OperationData.FromBase64().ToStringBuffer().Decompress().Split("|");
+                    if (stats.Length == 2)
+                    {
+                        Console.WriteLine("There are " + stats[1] + " pending operations, last block info:");
+                        Console.WriteLine(stats[0]);
+                    } else
+                        Console.WriteLine(_class.Result.OperationData.FromBase64().ToStringBuffer().Decompress());
+
+                    break;
                 default:
 
                     Console.WriteLine("Unknown packet received for client: " + _class.Result.GetID());

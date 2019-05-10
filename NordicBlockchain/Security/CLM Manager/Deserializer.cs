@@ -75,8 +75,9 @@ namespace Nordic.Security.CLM_Manager
 
                             _rawClass = new OperationAuthRequest(_author, _data, _signature);
 
-                            //if (!ClientAuthenticator.ClientAuthenticator.Verify(_signature, _author.ToByteArray().ToBase64(), "miner_test"))
-                            //    return null;
+                            // Check the miner does exist in the public keys database.
+                            if (!ClientAuthenticator.ClientAuthenticator.Verify(_author, _signature, _author))
+                                return null;
 
                             break;
                         case IOperation.OPERATION_TYPE.AUTHENTICATE_RESPONSE:
@@ -115,8 +116,6 @@ namespace Nordic.Security.CLM_Manager
                             _data = this.readString(reader);
                             _signature = this.readString(reader);
 
-                            
-
                             _rawClass = new OperationPendingAck(_author, _data, _signature);
 
                             break;
@@ -133,6 +132,34 @@ namespace Nordic.Security.CLM_Manager
                             _rawClass = new OperationConfirmTx(_author, _data, _signature);
 
                             break;
+                        case IOperation.OPERATION_TYPE.OPERATION_STATS_REQ:
+
+
+                            _opType = reader.ReadInt16();
+                            if (_opType != (short)IOperation.OPERATION_TYPE.OPERATION_STATS_REQ)
+                                throw new MalformedCLMPacket("Requested deserialization of " + typeof(OperationStatsRequest).ToString() + " but message optype is " + ((IOperation.OPERATION_TYPE)_opType).ToString() + ".");
+
+                            _author = this.readString(reader);
+                            _data = this.readString(reader);
+                            _signature = this.readString(reader);
+
+                            _rawClass = new OperationStatsRequest(_author, _data, _signature);
+
+                            break;
+                        case IOperation.OPERATION_TYPE.OPERATION_STATS_ACK:
+
+                            _opType = reader.ReadInt16();
+                            if (_opType != (short)IOperation.OPERATION_TYPE.OPERATION_STATS_ACK)
+                                throw new MalformedCLMPacket("Requested deserialization of " + typeof(OperationStatsAck).ToString() + " but message optype is " + ((IOperation.OPERATION_TYPE)_opType).ToString() + ".");
+
+                            _author = this.readString(reader);
+                            _data = this.readString(reader);
+                            _signature = this.readString(reader);
+
+                            _rawClass = new OperationStatsAck(_author, _data, _signature);
+
+                            break;
+
                         default:
                             throw new IllegalStreamOperation(string.Format("Unknown packet type {0}", _type));
 

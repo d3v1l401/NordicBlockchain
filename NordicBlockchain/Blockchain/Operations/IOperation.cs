@@ -27,7 +27,7 @@ namespace Nordic.Blockchain.Operations
             PENDING_OPERATION_ACK           = 0x6002,
 
             OPERATION_STATS_REQ             = 0x7001,
-            OPERATION_STATS_ACK             = 0x7002,
+            OPERATION_STATS_ACK             = 0x7101,
 
             OPERATION_NONE                  = 0xFFFF - 1
         };
@@ -61,8 +61,13 @@ namespace Nordic.Blockchain.Operations
                     (action => { _opType.OperationID = OPERATION_TYPE.PENDING_OPERATION_REQ; })
                 .Case<OperationAuthAck>
                     (action => { _opType.OperationID = OPERATION_TYPE.AUTHENTICATE_RESPONSE; })
+                .Case<OperationStatsRequest>
+                    (action => { _opType.OperationID = OPERATION_TYPE.OPERATION_STATS_REQ; })
+                .Case<OperationStatsAck>
+                    (action => { _opType.OperationID = OPERATION_TYPE.OPERATION_STATS_ACK; })
                 .Case<OperationPendingAck>
                     (action => { _opType.OperationID = OPERATION_TYPE.PENDING_OPERATION_ACK; });
+
     }
 }
 

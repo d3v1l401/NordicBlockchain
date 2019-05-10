@@ -40,9 +40,6 @@ namespace Nordic.Security.CLM_Manager
 
                 using (MemoryStream stream = new MemoryStream(_toDeserialize.AsBase64EncodedArray())) {
                     using (BinaryReader reader = new BinaryReader(stream)) {
-                        
-                        //  ----------------- TO REMOVE BEFORE PRODUCTION
-                        Console.WriteLine(_toDeserialize.AsBase64EncodedArray().HexDump());
 
                         var _messageSize = reader.ReadInt32();
                         if (!(_messageSize > 0) || (_messageSize > (Int32.MaxValue - Sha256.HASH_SIZE)))
