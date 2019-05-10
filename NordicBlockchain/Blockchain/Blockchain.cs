@@ -14,6 +14,7 @@ namespace Nordic.Blockchain
     public class Blockchain {
         private IList<Block> _chain { set; get; }
         private IList<BlockData> PendingOperations { get; set; }
+        private Dictionary<string, OperationTransaction> _votemap = new Dictionary<string, OperationTransaction>();
 
         private static Blockchain __instance = null;
 
@@ -29,6 +30,7 @@ namespace Nordic.Blockchain
             this._chain = new List<Block>();
 
             this.Add(new BlockData("", IOperation.OPERATION_TYPE.OPERATION_GENESIS_BLOCK, "Nope"));
+            __instance = this;
             //this.ProcessPendingOperation("d3vil401");
         }
 
@@ -83,41 +85,87 @@ namespace Nordic.Blockchain
             this._chain.Add(newBlock);
         }
 
-        public async Task<string> ProcessOperation(IOperation _operation) {
+        public async Task<bool> Vote(string _txId) {
+            if (this._votemap.ContainsKey(_txId)) {
+                this._votemap[_txId].Confirm();
+
+                if (this._votemap[_txId].IsDecisive())
+                    Blockchain.getInstance().ConfirmTransaction(this._votemap[_txId].GetIdentifier());
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<string> ProcessOperation(IOperation _operation, IOperation _reqParam = null) {
             var _responseBuffer = string.Empty;
 
             new Switch(_operation)
+                .Case<OperationConfirmTx>(action => {
+
+                    this.Vote(_operation.OperationData);
+
+                })
                 .Case<OperationTransaction>(action => {
 
                     var _data = new BlockData(_operation);
                     this.PendingOperations.Add(_data);
+                    this._votemap[_operation.Cast<OperationTransaction>().GetIdentifier()] = _operation.Cast<OperationTransaction>();
 
                 })
-               .Case<OperationAuthRequest>(action => {
+               .Case<OperationAuthRequest>(action =>
+               {
 
-                   
-
-                   using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider()) {
+                   using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
+                   {
                        byte[] val = new byte[32];
                        crypto.GetBytes(val);
                        var seed = BitConverter.ToInt64(val, 1);
-                       var _resp = new ClmManager(new OperationAuthAck("1", seed.ToString(), ServerAuthenticator.Sign(seed.ToString())));
+                       var _resp = new ClmManager(new OperationAuthAck("node_test", seed.ToString(), ServerAuthenticator.Sign(seed.ToString())));
                        _responseBuffer = _resp.GetBuffer().Result.ToBase64();
                    }
+               })
+               .Case<OperationPendingRequest>(action => {
 
+                   // This is for testing purpose, we force a pending transaction
+                   this.ProcessOperation(new OperationTransaction("Luca", "3200.0", "none"));
+
+                   // Get oldest pending operation, prioritizing longer awaiting operations.
+                   if (this.PendingOperations.Count > 0) {
+                       var _tx = this.PendingOperations.Last()._operation;
+                       if (_tx != null) {
+                           // Leave data empty, it's going to be filled by AssignTx
+                           var _ack = new OperationPendingAck("node_test", "", "");
+                           try {
+                               _ack.AssignTx(_tx.Cast<OperationTransaction>(), _operation.OperationData);
+                           } catch (Exception ex) {
+                               Console.WriteLine(ex.Message);
+                           }
+
+                           _ack.Signature = ServerAuthenticator.Sign(_ack.OperationData);
+                           var _clmTemp = new ClmManager(_ack);
+                           _responseBuffer = _clmTemp.GetBuffer().Result.ToBase64();
+                       }
+                   }
 
                });
 
             return _responseBuffer != null ? _responseBuffer : string.Empty;
         }
 
-        public void ProcessPendingOperation(string _minerIdentifier) {
-            this.Add(this.PendingOperations.ToList());
+        public bool ConfirmTransaction(string _txId) {
+            foreach (var tx in this.PendingOperations) {
+                if (tx._operation.GetID() == IOperation.OPERATION_TYPE.TRANSACTION_REQUEST && tx._operation.Cast<OperationTransaction>().GetIdentifier().Equals(_txId)) {
+                    this.LastBlock().AddTransaction(tx);
 
-            this.PendingOperations.Clear();
-            var _signature = ServerAuthenticator.Sign(_minerIdentifier);
+                    this._votemap[_txId] = null;
+                    this.PendingOperations.Remove(tx);
+                    return true;
+                }
+            }
 
-            this.Add(new BlockData(_minerIdentifier, IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK, _signature));
+            return false;
         }
 
         public void Add(List<BlockData> _data) {

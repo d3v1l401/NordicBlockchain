@@ -12,13 +12,19 @@ namespace Nordic.Security
         private static readonly string CURRENT_NODE_IDENTIFIER = "_this_";
 
         private Dictionary<string, RSA> _vault = new Dictionary<string, RSA>();
+        private string _pemPubKey = string.Empty;
 
         public TrustVault(string _thisNodePrivKey, string _thisNodePubKey) {
             this._vault.Add(CURRENT_NODE_IDENTIFIER, new RSA(_thisNodePrivKey, _thisNodePubKey));
+            this._pemPubKey = _thisNodePubKey;
             if (this._vault[CURRENT_NODE_IDENTIFIER] == null)
                 throw new RSAProviderException("This node has no RSA provider");
             
         }
+
+        public string GetPubKey() 
+            => this._pemPubKey;
+        
 
         public string Sign(string _inputData) {
             return this._vault[CURRENT_NODE_IDENTIFIER].Sign(_inputData);

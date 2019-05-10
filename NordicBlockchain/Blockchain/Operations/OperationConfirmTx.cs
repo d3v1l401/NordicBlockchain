@@ -20,8 +20,7 @@ namespace Nordic.Blockchain.Operations
             __assignOpId(this);
         }
 
-        public void Confirm()
-        {
+        public void Confirm() {
             if (this._confirmCounter < Int32.MaxValue)
                 this._confirmCounter++;
         }

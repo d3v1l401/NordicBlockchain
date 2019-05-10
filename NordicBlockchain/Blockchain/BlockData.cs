@@ -12,6 +12,9 @@ namespace Nordic.Blockchain
 
         public BlockData(IOperation _operation) {
             switch (_operation.GetID()) {
+                case IOperation.OPERATION_TYPE.TRANSACTION_MINER_CONFIRM:
+
+                    break;
                 case IOperation.OPERATION_TYPE.TRANSACTION_REQUEST:
 
                     this._operation = _operation;

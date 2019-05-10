@@ -34,48 +34,14 @@ namespace Nordic.Security.CLM_Manager
             using (_memory = new MemoryStream()) {
                 using (BinaryWriter _writer = new BinaryWriter(_memory)) {
 
-                    // Message buffer
-                    new Switch(_operation)
-                        .Case<OperationTransaction> (action => {
-
-                            _writer.Write(_type);
-                            _sizeSoFar += sizeof(short);
-                            this.writeString(_writer, _operation.GetAuthor());
-                            _sizeSoFar += _operation.GetAuthor().Length + sizeof(short);
-                            this.writeString(_writer, _operation.OperationData);
-                            _sizeSoFar += _operation.OperationData.Length + sizeof(short);
-                            this.writeString(_writer, _operation.GetSignature());
-                            _sizeSoFar += _operation.GetSignature().Length + sizeof(short);
-
-                        })
-                        .Case<OperationAuthRequest> (action => {
-
-                            _writer.Write(_type);
-                            _sizeSoFar += sizeof(short);
-                            this.writeString(_writer, _operation.GetAuthor());
-                            _sizeSoFar += _operation.GetAuthor().Length + sizeof(short);
-                            this.writeString(_writer, _operation.OperationData);
-                            _sizeSoFar += _operation.OperationData.Length + sizeof(short);
-                            this.writeString(_writer, _operation.GetSignature());
-                            _sizeSoFar += _operation.GetSignature().Length + sizeof(short);
-
-                        })
-                        .Case<OperationAuthAck> (action =>
-                        {
-                            _writer.Write(_type);
-                            _sizeSoFar += sizeof(short);
-                            this.writeString(_writer, _operation.GetAuthor());
-                            _sizeSoFar += _operation.GetAuthor().Length + sizeof(short);
-                            this.writeString(_writer, _operation.OperationData);
-                            _sizeSoFar += _operation.OperationData.Length + sizeof(short);
-                            this.writeString(_writer, _operation.GetSignature());
-                            _sizeSoFar += _operation.GetSignature().Length + sizeof(short);
-
-                        })
-                        .Case<OperationNewBlock> (action => {
-
-
-                        });
+                    _writer.Write(_type);
+                    _sizeSoFar += sizeof(short);
+                    this.writeString(_writer, _operation.GetAuthor());
+                    _sizeSoFar += _operation.GetAuthor().Length + sizeof(short);
+                    this.writeString(_writer, _operation.OperationData);
+                    _sizeSoFar += _operation.OperationData.Length + sizeof(short);
+                    this.writeString(_writer, _operation.GetSignature());
+                    _sizeSoFar += _operation.GetSignature().Length + sizeof(short);
 
                     // Write Hash
                     var _toHash = new byte[_memory.Length];

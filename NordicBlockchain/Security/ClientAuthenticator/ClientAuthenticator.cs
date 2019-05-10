@@ -19,6 +19,10 @@ namespace Nordic.Security.ClientAuthenticator
             return _vault.Sign(_input);
         }
 
+        public static string GetPubKey() {
+            return _vault.GetPubKey();
+        }
+
         public static void Add(string _identifier, string _pubKey) {
             _vault.Add(_identifier, _pubKey);
         }

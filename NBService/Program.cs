@@ -12,6 +12,7 @@ using Nordic.Security.ServerAuthenticator;
 using Nordic.SharedCache;
 using System;
 using System.IO;
+using System.Threading;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -20,6 +21,23 @@ namespace NBService
 
     class Program
     {
+        static ConsoleKeyInfo cki = new ConsoleKeyInfo();
+        private static bool WaitOrBreak(Block chain)
+        {
+            if (Console.KeyAvailable) cki = Console.ReadKey(true);
+            if (cki.Key == ConsoleKey.Spacebar) {
+                while (Console.KeyAvailable == false) {
+                    Thread.Sleep(250);
+                    Console.WriteLine(chain.ToString());
+                }
+                Console.WriteLine();
+                Console.ReadKey(true);
+                cki = new ConsoleKeyInfo();
+            }
+            if (cki.Key == ConsoleKey.Escape) return true;
+            return false;
+        }
+
         static void Main(string[] args) {
             //if (!ConfigurationHelper.Import("NordicConf.json")) {
             //    Console.WriteLine("Configuration import failed, using default values and writing configuration file \"NordicConf.json\".");
@@ -37,7 +55,7 @@ namespace NBService
             var gBlock = _nbStructure.GetBlock(0);
 
             Console.WriteLine(gBlock.ToString());
-            _nbStructure.Add(new BlockData("", IOperation.OPERATION_TYPE.SECURITY_BC_COMPROMISE_NOTICE, "Lol"));
+            //_nbStructure.Add(new BlockData("", IOperation.OPERATION_TYPE.SECURITY_BC_COMPROMISE_NOTICE, "Lol"));
             Console.WriteLine(_nbStructure.LastBlock().ToString());
 
             Console.WriteLine("Fork Validity: " + _nbStructure.Validity());
@@ -82,6 +100,7 @@ namespace NBService
             cl.Connect("ws://127.0.0.1:1337/blt");
             bool _sent = false;
             while (true) {
+                if (WaitOrBreak(_nbStructure.LastBlock())) break;
                 //try {
                 //    if (!_sent) {
                 //        IOperation _op = new OperationTransaction("d3vil401", "13.2", "none");

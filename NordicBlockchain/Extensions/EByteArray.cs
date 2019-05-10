@@ -20,6 +20,17 @@ namespace Nordic.Extensions
             return Convert.FromBase64String(_asString);
         }
 
+        public static string ToUTFStringBuffer(this byte[] _array) {
+            if (_array != null) {
+                var charArray = new char[_array.Length];
+                for (var i = 0; i < _array.Length; i++)
+                    charArray[i] = Convert.ToChar(_array[i]);
+                return Convert.ToString(Encoding.UTF8.GetBytes(charArray));
+            }
+
+            return null;
+        }
+
         public static string ToStringBuffer(this byte[] _array) {
             if (_array != null)
                 return Encoding.ASCII.GetString(_array);

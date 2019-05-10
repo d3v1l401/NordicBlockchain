@@ -7,11 +7,22 @@ using System.Text;
 
 namespace Nordic.Blockchain.Operations
 {
+    public enum CONFIRM_STATUS {
+        STATUS_LOW = 1,
+        STATUS_MEDIUM = 5,
+        STATUS_HIGH = 10,
+        STATUS_DECISIVE = 20,
+
+        STATUS_NONE = 0
+    };
     public class OperationTransaction : IOperation {
 
         private int         _confirmCounter     = 0;
         private string      _txIdentifier       = string.Empty;
         private DateTime    _queueDate          = DateTime.Now;
+
+        public DateTime GetQueueDate()
+            => this._queueDate;
 
         public OperationTransaction(string _author, string _data, string _signature) {
             base.OperationAuthor = _author;
@@ -28,6 +39,10 @@ namespace Nordic.Blockchain.Operations
 
         public string GetIdentifier()
             => this._txIdentifier;
+
+        // WARNING: DEBUG MODE ONLY ACCEPTS 1 CONFIRMATION BECAUSE OF TESTING, FOR PRODUCTION USE STATUS_HIGH
+        public bool IsDecisive()
+            => this._confirmCounter >= CONFIRM_STATUS.STATUS_LOW.Cast<int>() ? true : false;
 
         public void Confirm() {
             if (this._confirmCounter < Int32.MaxValue)

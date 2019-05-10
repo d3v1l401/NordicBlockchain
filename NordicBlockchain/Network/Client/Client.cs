@@ -1,4 +1,5 @@
-﻿using Nordic.Extensions;
+﻿using Nordic.Blockchain.Operations;
+using Nordic.Extensions;
 using Nordic.Security.CLM_Manager;
 using SuperSocket.ClientEngine;
 using System;
@@ -12,22 +13,34 @@ namespace Nordic.Network.Client
         private IDictionary<string, WebSocket> sessions = new Dictionary<string, WebSocket>();
         private string _authToken = string.Empty;
 
+        public delegate string processPendingTicket(OperationPendingAck _op);
+        public processPendingTicket TicketProcessor = null;
+
         public string GetToken()
             => this._authToken;
 
-        private void OnMessage(object sender, DataReceivedEventArgs e) {
+        private void OnMessage(WebSocket sender, DataReceivedEventArgs e) {
 
-            Console.WriteLine(e.Data.HexDump());
+            //Console.WriteLine(e.Data.HexDump());
+
+            if (e.Data == null || e.Data.Length == 0)
+                return;
 
             var _op = new ClmManager(e.Data);
             var _class = _op.GetClass();
 
             switch (_class.Result.GetID()) {
-                case Blockchain.Operations.IOperation.OPERATION_TYPE.AUTHENTICATE_RESPONSE:
+                case IOperation.OPERATION_TYPE.AUTHENTICATE_RESPONSE:
 
                     this._authToken = _class.Result.OperationData;
 
                 break;
+                case IOperation.OPERATION_TYPE.PENDING_OPERATION_ACK:
+
+                    var _result = this.TicketProcessor(_class.Result.Cast<OperationPendingAck>());
+                    sender.Send(_result);
+
+                    break;
                 default:
 
                     Console.WriteLine("Unknown packet received for client: " + _class.Result.GetID());
@@ -37,7 +50,7 @@ namespace Nordic.Network.Client
         }
 
         // Override default receive event to data only.
-        private void OnMessageAsString(object sender, MessageReceivedEventArgs e) {
+        private void OnMessageAsString(WebSocket sender, MessageReceivedEventArgs e) {
             this.OnMessage(sender, new DataReceivedEventArgs(e.Message.ToByteArrayUTF()));
         }
 
@@ -49,8 +62,8 @@ namespace Nordic.Network.Client
             if (!this.sessions.ContainsKey(_url)) {
                 WebSocket _websck = new WebSocket(_url);
 
-                _websck.DataReceived += (s, e) => { this.OnMessage(s, e); };
-                _websck.MessageReceived += (s, e) => { this.OnMessageAsString(s, e); };
+                _websck.DataReceived += (s, e) => { this.OnMessage((WebSocket)s, e); };
+                _websck.MessageReceived += (s, e) => { this.OnMessageAsString((WebSocket)s, e); };
                 _websck.Error += (s, e) => { this.OnError(s, e); };
 
                 _websck.Open();

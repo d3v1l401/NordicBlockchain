@@ -26,6 +26,9 @@ namespace Nordic.Blockchain.Operations
             PENDING_OPERATION_REQ           = 0x6001,
             PENDING_OPERATION_ACK           = 0x6002,
 
+            OPERATION_STATS_REQ             = 0x7001,
+            OPERATION_STATS_ACK             = 0x7002,
+
             OPERATION_NONE                  = 0xFFFF - 1
         };
 
@@ -56,11 +59,10 @@ namespace Nordic.Blockchain.Operations
                     (action => { _opType.OperationID = OPERATION_TYPE.TRANSACTION_MINER_CONFIRM; })
                 .Case<OperationPendingRequest>
                     (action => { _opType.OperationID = OPERATION_TYPE.PENDING_OPERATION_REQ; })
-                .Case<OperationPendingTicket>
-                    (action => { _opType.OperationID = OPERATION_TYPE.PENDING_OPERATION_ACK; })
                 .Case<OperationAuthAck>
-                    (action => { _opType.OperationID = OPERATION_TYPE.AUTHENTICATE_RESPONSE; });
-
+                    (action => { _opType.OperationID = OPERATION_TYPE.AUTHENTICATE_RESPONSE; })
+                .Case<OperationPendingAck>
+                    (action => { _opType.OperationID = OPERATION_TYPE.PENDING_OPERATION_ACK; });
     }
 }
 

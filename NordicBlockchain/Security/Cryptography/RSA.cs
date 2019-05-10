@@ -9,7 +9,7 @@ using PemUtils;
 
 // beginor's
 // https://gist.github.com/beginor/0d0acd7304c0e1d98d89e687aa8322e1
-// ASN.1 encoded keys compatibility layer for OpenSSL's generated keys.
+// ASN.1 encoded keys compatibility layer for OpenSSL's PEM generated keys.
 
 namespace Nordic.Security.Cryptography
 {
@@ -47,12 +47,13 @@ namespace Nordic.Security.Cryptography
                 return _encrypt(_input);
             else throw new NullServiceProviderException("Private RSA Provider = nullptr");
         }
+
         private string _encrypt(string _input) {
             byte[] _data = _input.ToByteArrayUTF();
             int _maxBlockSize = this._publicKeyRsaProvider.KeySize / 8 - 11;
 
             if (_data.Length <= _maxBlockSize)
-                return this._publicKeyRsaProvider.Encrypt(_data, false).ToBase64();
+                return this._publicKeyRsaProvider.Encrypt(_data, RSAEncryptionPadding.Pkcs1).ToStringBuffer();
             else {
                 // Need to chunk
                 using (MemoryStream _memStream = new MemoryStream(_data))
@@ -70,16 +71,16 @@ namespace Nordic.Security.Cryptography
                         _blockSize = _memStream.Read(_buffer, 0, _maxBlockSize);
                     }
 
-                    return _crStream.ToArray().ToBase64();
+                    return _crStream.ToArray().ToStringBuffer();
                 }
             }
         }
         private string _decrypt(string _input) {
-            byte[] _data = _input.ToByteArrayUTF();
+            byte[] _data = _input.ToByteArray();
             int _maxBlockSize = this._privateKeyRsaProvider.KeySize / 8;
 
             if (_data.Length <= _maxBlockSize)
-                return this._privateKeyRsaProvider.Decrypt(_data, false).ToBase64();
+                return this._privateKeyRsaProvider.Decrypt(_data, true).ToStringBuffer();
             else {
                 using (MemoryStream _crStream = new MemoryStream(_data))
                 using (MemoryStream _memStream = new MemoryStream()) {
@@ -96,7 +97,7 @@ namespace Nordic.Security.Cryptography
                         _blockSize = _memStream.Read(_buffer, 0, _maxBlockSize);
                     }
 
-                    return _memStream.ToArray().ToBase64();
+                    return _memStream.ToArray().ToStringBuffer();
                 }
             }
         }
