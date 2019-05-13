@@ -6,13 +6,16 @@ using System.Text;
 
 namespace Nordic.Blockchain.Operations
 {
-    public class OperationNewBlock : IOperation {
-        public OperationNewBlock(string _author, string _data, string _signature) {
+    public class OperationTxStatus : IOperation
+    {
+        private string _txIdentifier = string.Empty;
+
+        public OperationTxStatus(string _author, string _data, string _signature)
+        {
             base.OperationAuthor = _author;
             base.OperationData = _data;
             base.Signature = _signature;
 
-            // Auto-determine type & assign proper ID.
             __assignOpId(this);
         }
 
@@ -30,7 +33,5 @@ namespace Nordic.Blockchain.Operations
 
         public override string ToString()
             => JsonConvert.SerializeObject(this);
-        
-
     }
 }

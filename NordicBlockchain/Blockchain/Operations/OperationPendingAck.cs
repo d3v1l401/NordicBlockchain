@@ -31,7 +31,9 @@ namespace Nordic.Blockchain.Operations
                     + _tx.OperationID + "|"                                 // 3 
                     + Convert.ToString(DateTime.UtcNow.ToOADate()));        // 4
                 //RSA _rsa = new RSA(null, _minerPubKey);
-                //var _encrypted = _rsa.Encrypt(this.OperationData.ToByteArray().ToStringBuffer());
+                //var _encrypted = Encoding.UTF8.GetBytes(_rsa.Encrypt(this.OperationData));
+                //this.OperationData = _encrypted.ToStringBuffer();
+                //this.OperationData = this.OperationData.ToByteArray().ToBase64();
 
                 return true;
 

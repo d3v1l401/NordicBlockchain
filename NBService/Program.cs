@@ -106,6 +106,8 @@ namespace NBService
 
                 if (!_nbStructure.Validity()) {
                     Console.WriteLine("Blockchain violation detected!");
+
+                    
                     break;
                 }
                 //try {

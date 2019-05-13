@@ -12,9 +12,9 @@ namespace Nordic.Blockchain.Operations
             //TRANSACTION_MANUAL_CONFIRM      = 0x1011,
             //TRANSACTION_MANUAL_REJECT       = 0x1012,
             TRANSACTION_MINER_CONFIRM       = 0x1014,
-
-            BROADCAST_NEW_BLOCK             = 0x2001,
-            BROADCAST_CLOSED_BLOCK          = 0x2010,
+            // Request for transaction status.
+            TRANSACTION_STATUS_REQ          = 0x1021,
+            TRANSACTION_STATUS_ACK          = 0x1022,
 
             SECURITY_BC_COMPROMISE_NOTICE   = 0x4001,
 
@@ -32,9 +32,8 @@ namespace Nordic.Blockchain.Operations
             OPERATION_NONE                  = 0xFFFF - 1
         };
 
-        public static OPERATION_TYPE GetOperationType(UInt16 _type) {
-            return (OPERATION_TYPE)_type;
-        }
+        public static OPERATION_TYPE GetOperationType(UInt16 _type) 
+            => (OPERATION_TYPE)_type;
 
         public string            OperationAuthor { get; set; }    // Author token
         public OPERATION_TYPE    OperationID { get; set; }
@@ -51,8 +50,6 @@ namespace Nordic.Blockchain.Operations
            => new Switch(_opType)
                 .Case<OperationTransaction>
                     (action => { _opType.OperationID = OPERATION_TYPE.TRANSACTION_REQUEST; })
-                .Case<OperationNewBlock>
-                    (action => { _opType.OperationID = OPERATION_TYPE.BROADCAST_NEW_BLOCK; })
                 .Case<OperationAuthRequest>
                     (action => { _opType.OperationID = OPERATION_TYPE.AUTHENTICATE_REQUEST; })
                 .Case<OperationConfirmTx>
@@ -65,6 +62,10 @@ namespace Nordic.Blockchain.Operations
                     (action => { _opType.OperationID = OPERATION_TYPE.OPERATION_STATS_REQ; })
                 .Case<OperationStatsAck>
                     (action => { _opType.OperationID = OPERATION_TYPE.OPERATION_STATS_ACK; })
+                .Case<OperationTxStatus>
+                    (action => { _opType.OperationID = OPERATION_TYPE.TRANSACTION_STATUS_REQ; })
+                .Case<OperationTxStatusAck>
+                    (action => { _opType.OperationID = OPERATION_TYPE.TRANSACTION_STATUS_ACK; })
                 .Case<OperationPendingAck>
                     (action => { _opType.OperationID = OPERATION_TYPE.PENDING_OPERATION_ACK; });
 

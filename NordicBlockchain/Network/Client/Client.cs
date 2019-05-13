@@ -52,6 +52,15 @@ namespace Nordic.Network.Client
                         Console.WriteLine(_class.Result.OperationData.FromBase64().ToStringBuffer().Decompress());
 
                     break;
+                case IOperation.OPERATION_TYPE.TRANSACTION_STATUS_ACK:
+
+                    var _txDump = _class.Result.OperationData.Split('|');
+                    
+                    Console.WriteLine("Transaction details:" + _txDump[0]);
+                    var _detail = int.Parse(_txDump[1]) >= 1 ? "Registered" : "Awaiting votes";
+                    Console.WriteLine("Current votes: " + _txDump[1] + " (" + _detail + ")");
+
+                    break;
                 default:
 
                     Console.WriteLine("Unknown packet received for client: " + _class.Result.GetID());

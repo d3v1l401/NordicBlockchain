@@ -59,10 +59,10 @@ namespace Nordic.Security.CLM_Manager
                             _rawClass = new OperationTransaction(_author, _data, _signature);
 
                             break;
-                        case IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK:
-
-                            // TODO
-                            break;
+                        //case IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK:
+                        //
+                        //    // TODO
+                        //    break;
                         case IOperation.OPERATION_TYPE.AUTHENTICATE_REQUEST:
 
                             _opType = reader.ReadInt16();
@@ -160,6 +160,33 @@ namespace Nordic.Security.CLM_Manager
 
                             break;
 
+                        case IOperation.OPERATION_TYPE.TRANSACTION_STATUS_REQ:
+
+                            _opType = reader.ReadInt16();
+                            if (_opType != (short)IOperation.OPERATION_TYPE.TRANSACTION_STATUS_REQ)
+                                throw new MalformedCLMPacket("Requested deserialization of " + typeof(OperationTxStatus).ToString() + " but message optype is " + ((IOperation.OPERATION_TYPE)_opType).ToString() + ".");
+
+                            _author = this.readString(reader);
+                            _data = this.readString(reader);
+                            _signature = this.readString(reader);
+
+                            _rawClass = new OperationTxStatus(_author, _data, _signature);
+
+                            break;
+
+                        case IOperation.OPERATION_TYPE.TRANSACTION_STATUS_ACK:
+
+                            _opType = reader.ReadInt16();
+                            if (_opType != (short)IOperation.OPERATION_TYPE.TRANSACTION_STATUS_ACK)
+                                throw new MalformedCLMPacket("Requested deserialization of " + typeof(OperationTxStatusAck).ToString() + " but message optype is " + ((IOperation.OPERATION_TYPE)_opType).ToString() + ".");
+
+                            _author = this.readString(reader);
+                            _data = this.readString(reader);
+                            _signature = this.readString(reader);
+
+                            _rawClass = new OperationTxStatusAck(_author, _data, _signature);
+
+                            break;
                         default:
                             throw new IllegalStreamOperation(string.Format("Unknown packet type {0}", _type));
 

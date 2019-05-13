@@ -18,6 +18,8 @@ namespace NordicMiner
         static string _hardcodedChallenge     = "miner_test";
         static RSA _crypto = null;
 
+        static string _lastTxId = string.Empty;
+
         private static string pendingTicketProcessor(OperationPendingAck _op) {
 
             if (_op != null) {
@@ -50,6 +52,8 @@ namespace NordicMiner
                                 Sha256 _sha = new Sha256();
                                 _sha.Enqueue((_author + "-" + _signature + "-" + _queueDate.ToString()).ToByteArray());
                                 var _txId = _sha.Finalize().ToBase64();
+
+                                _lastTxId = _txId;
 
                                 var _ticketVote = new ClmManager(new OperationConfirmTx(_hardcodedChallenge, _txId, "sign"));
                                 var _buffer = _ticketVote.GetBuffer().Result;
@@ -108,14 +112,20 @@ namespace NordicMiner
 
             await Task.Delay(5000);
 
-
             // Impersonate administrator, ask for statistics (last block)
             _clm = new ClmManager(new OperationStatsRequest("admin_test", "", ""));
             _buff = _clm.GetBuffer().Result.ToBase64();
             _client.Send(_defaultEndpoint, _buff);
 
 
-            await Task.Delay(2000000);
+            await Task.Delay(5000);
+
+            // Impersonating user, ask for tx status.
+            _clm = new ClmManager(new OperationTxStatus("user_test", _lastTxId, ""));
+            _buff = _clm.GetBuffer().Result.ToBase64();
+            _client.Send(_defaultEndpoint, _buff);
+
+            await Task.Delay(500000000);
 
             Console.ReadLine();
         }

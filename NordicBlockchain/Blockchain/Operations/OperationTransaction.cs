@@ -24,6 +24,9 @@ namespace Nordic.Blockchain.Operations
         public DateTime GetQueueDate()
             => this._queueDate;
 
+        public int Votes()
+            => this._confirmCounter;
+
         public OperationTransaction(string _author, string _data, string _signature) {
             base.OperationAuthor = _author;
             base.OperationData = _data;

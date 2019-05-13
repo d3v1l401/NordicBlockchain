@@ -25,11 +25,11 @@ namespace Nordic.Blockchain
                     this._operation = new Operations.OperationTransaction("", "Let there be light and JSON", "d3vil401");
 
                     break;
-                case IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK:
-
-                    this._operation = new Operations.OperationNewBlock(_operation.GetAuthor(), _operation.GetData().ToStringBuffer(), _operation.Signature);
-
-                    break;
+                //case IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK:
+                //
+                //    this._operation = new Operations.OperationNewBlock(_operation.GetAuthor(), _operation.GetData().ToStringBuffer(), _operation.Signature);
+                //
+                //    break;
             }
         }
 
@@ -40,11 +40,11 @@ namespace Nordic.Blockchain
                     this._operation = new Operations.OperationTransaction("", "Let there be light and JSON", "d3vil401");
 
                     break;
-                case IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK:
-
-                    this._operation = new Operations.OperationNewBlock(_author, "", "d3vil401");
-
-                    break;
+                //case IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK:
+                //
+                //    this._operation = new Operations.OperationNewBlock(_author, "", "d3vil401");
+                //
+                //    break;
             }
         }
 

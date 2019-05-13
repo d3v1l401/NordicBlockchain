@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Nordic.Security.CLM_Manager;
 using Nordic.Extensions;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace Nordic.Blockchain
 {
@@ -89,24 +90,45 @@ namespace Nordic.Blockchain
             return false;
         }
 
+        public async Task<OperationTransaction> getTxStatus(string _txId) {
+            if (this._votemap.ContainsKey(_txId))
+                return this._votemap[_txId];
+            
+            foreach (var _block in this._chain) {
+                foreach (var _blockData in _block.Data) {
+                    if (_blockData != null && _blockData._operation.GetID() == IOperation.OPERATION_TYPE.TRANSACTION_REQUEST) {
+
+                        var _tx = (OperationTransaction)(_blockData._operation);
+                        if (_tx.GetIdentifier().Equals(_txId))
+                            return _tx;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         public async Task<string> ProcessOperation(IOperation _operation, IOperation _reqParam = null) {
             var _responseBuffer = string.Empty;
 
             new Switch(_operation)
-                .Case<OperationConfirmTx>(action => {
+                .Case<OperationConfirmTx> ( action => {
 
-                    this.Vote(_operation.OperationData);
+                    var _didVote = this.Vote(_operation.OperationData).Result;
+                    if (!_didVote) {
+                        // Didn't vote because no tx has such TxID.
+                        Console.WriteLine("Couldn't vote for " + _operation.OperationData + " because it's not on votemap.");
+                    }
 
                 })
-                .Case<OperationTransaction>(action => {
+                .Case<OperationTransaction> ( action => {
 
                     var _data = new BlockData(_operation);
                     this.PendingOperations.Add(_data);
                     this._votemap[_operation.Cast<OperationTransaction>().GetIdentifier()] = _operation.Cast<OperationTransaction>();
 
                 })
-               .Case<OperationAuthRequest>(action =>
-               {
+               .Case<OperationAuthRequest> ( action => {
 
                    using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
                    {
@@ -117,18 +139,28 @@ namespace Nordic.Blockchain
                        _responseBuffer = _resp.GetBuffer().Result.ToBase64();
                    }
                })
-               .Case<OperationStatsRequest> (action =>
-               {
+               .Case<OperationTxStatus> (async action => {
+
+                   var _res = await this.getTxStatus(_operation.OperationData);
+                   var _resp = new ClmManager(new OperationTxStatusAck("node_test", _res.ToString() + "|" + _res.Votes(), ServerAuthenticator.Sign(_res.ToString())));
+                   _responseBuffer = _resp.GetBuffer().Result.ToBase64();
+
+               })
+               .Case<OperationStatsRequest> ( action => {
 
                    var data = (this.LastBlock().ToString() + "|" + this.PendingOperations.Count).Compress().ToByteArray().ToBase64();
                    var _resp = new ClmManager(new OperationStatsAck("node_test", data, "none"));
                    _responseBuffer = _resp.GetBuffer().Result.ToBase64();
 
                })
-               .Case<OperationPendingRequest>(action => {
+               .Case<OperationPendingRequest> ( action => {
 
-                   // This is for testing purpose, we force a pending transaction
-                   this.ProcessOperation(new OperationTransaction("Luca", "3200.0", "none"));
+                   // We're just forcing the existance of a transaction by me, for the pure reason we are testing this.
+                   Security.Cryptography.RSA _rsa = new Security.Cryptography.RSA(File.ReadAllText("user_privKeyOut.pem"), File.ReadAllText("user_pubKey.pem"));
+                   // Tx from me to Poul of 3200.0 kr, assets are not be kept private from miners, miner only need to know who's involved.
+                   // This is not the best practice, but it's quick for our needs.
+                   this.ProcessOperation(new OperationTransaction("Luca-Poul", "3200.0", _rsa.Sign("Luca|Poul")));
+
 
                    // Get oldest pending operation, prioritizing longer awaiting operations.
                    if (this.PendingOperations.Count > 0) {
@@ -157,13 +189,14 @@ namespace Nordic.Blockchain
             foreach (var tx in this.PendingOperations) {
                 if (tx._operation.GetID() == IOperation.OPERATION_TYPE.TRANSACTION_REQUEST && tx._operation.Cast<OperationTransaction>().GetIdentifier().Equals(_txId)) {
                     // Too many transactions, new block required.
-                    if (this.LastBlock().IsMaxLedger()) {
+                    if (this.LastBlock().IsMaxLedger())
                         this.AddSingle(null);
-                    }
 
+                    // Register transaction into the block.
                     this.LastBlock().AddTransaction(tx);
-
-                    this._votemap[_txId] = null;
+                    // Remove the transaction from votemap, it's done already.
+                    //this._votemap[_txId] = null;
+                    this._votemap.Remove(_txId);
 
                     return true;
                 }
