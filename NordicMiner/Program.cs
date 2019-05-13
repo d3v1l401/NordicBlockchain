@@ -86,7 +86,7 @@ namespace NordicMiner
             await Task.Delay(3000);
 
             Console.WriteLine("Authenticating...");
-            // Request connection (only notifies of existance for the node).
+            // Request connection (only notifies of existence for the node).
             IOperation _auth = new OperationAuthRequest(_hardcodedChallenge, "", ClientAuthenticator.Sign(_hardcodedChallenge));
             _clm = new ClmManager(_auth);
             var _buff = _clm.GetBuffer().Result.ToBase64();

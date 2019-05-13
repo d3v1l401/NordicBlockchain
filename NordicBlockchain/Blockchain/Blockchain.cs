@@ -50,11 +50,15 @@ namespace Nordic.Blockchain
             => this._chain.Where(x => x.Timestamp >= _from && x.Timestamp <= _to).ToArray();
 
         public bool Validity() {
+            // Can't verify compromise of BC if there's only one block, it will always be true.
+            if (this._chain.Count == 1)
+                return true;
+
             for (int i = 1; i < this._chain.Count; i++) {
                 if (this._chain[i].Hash != this._chain[i].RecalculateHash())
                     return false;
 
-                if (this._chain[i].PrevHash != this._chain[i - 1].Hash)
+                if (this._chain[i].PrevHash != this._chain[i - 1].RecalculateHash())
                     return false;
             }
 
@@ -72,7 +76,9 @@ namespace Nordic.Blockchain
 
         public void AddSingle(BlockData _data) {
             var _list = new List<BlockData>();
-            _list.Add(_data);
+
+            if (_data != null)
+                _list.Add(_data);
 
             this.Add(_list);
         }

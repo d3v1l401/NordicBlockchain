@@ -23,7 +23,7 @@ namespace Nordic.Security.Cryptography
 
         public void Dequeue(int _count) {
             for (var i = 0; i < _count; i++)
-                this._buffer.RemoveAt(this._buffer.Count);
+                this._buffer.RemoveAt(this._buffer.Count - 1);
         }
 
         public void Enqueue(byte[] _buffer) {

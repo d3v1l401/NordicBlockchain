@@ -11,7 +11,7 @@ namespace Nordic.Security.ClientAuthenticator
         public static void Initialize(string _pathToPubKey, string _pathToPrivKey, string _pathToLocalVault) {
             _vault = new TrustVault(File.ReadAllText(_pathToPrivKey), File.ReadAllText(_pathToPubKey));
 
-            if (_pathToLocalVault.Length > 0)
+            if (!string.IsNullOrEmpty(_pathToLocalVault) && _pathToLocalVault.Length > 0)
                 _vault.FromJson(File.ReadAllText(_pathToLocalVault));
         }
 
