@@ -74,7 +74,7 @@ namespace Nordic.Network.Client
             this.OnMessage(sender, new DataReceivedEventArgs(e.Message.ToByteArrayUTF()));
         }
 
-        protected void OnError(object sender, ErrorEventArgs e) {
+        protected void OnError(WebSocket sender, ErrorEventArgs e) {
             Console.WriteLine("ERROR: " + e.Exception.Message);
         }
 
