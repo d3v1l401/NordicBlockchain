@@ -61,6 +61,10 @@ namespace NordicTester
 
             var _lastBlockWithTx = (OperationTransaction)this._blockchain.LastBlock().Data[0]._operation;
             Assert.True(_lastBlockWithTx.GetIdentifier() == this._testingTxId);
+
+            // This Tx should not exist.
+            _newStatus = this._blockchain.getTxStatus(this._testingTxId + "0").Result;
+            Assert.Null(_newStatus);
         }
 
         [Fact]

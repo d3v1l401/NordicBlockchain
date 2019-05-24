@@ -65,10 +65,11 @@ namespace Nordic.Blockchain
             return true;
         }
         public bool Validity(Block _block) {
-            if (this.GetBlock(_block.Index).Hash != this.GetBlock(_block.Index + 1).PrevHash)
-                return false;
+            if (this.GetBlock(_block.Index + 1) != null)
+                if (this.GetBlock(_block.Index).Hash == this.GetBlock(_block.Index + 1).PrevHash)
+                    return true;
 
-            return true;
+            return false;
         }
 
         public bool Validity(ulong _id) 

@@ -1,16 +1,20 @@
 ﻿using Newtonsoft.Json;
 using Nordic.Blockchain.Operations;
 using Nordic.Extensions;
+using Nordic.Security;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace Nordic.Blockchain
 {
     public class BlockData {
         public IOperation _operation;
+        public TrustVault _trustVault = new TrustVault(null, null);
 
         public BlockData(IOperation _operation) {
+
             switch (_operation.GetID()) {
                 case IOperation.OPERATION_TYPE.TRANSACTION_MINER_CONFIRM:
 
@@ -22,7 +26,16 @@ namespace Nordic.Blockchain
                     break;
                 case IOperation.OPERATION_TYPE.OPERATION_GENESIS_BLOCK:
 
-                    this._operation = new Operations.OperationTransaction("", "Let there be light and JSON", "d3vil401");
+                    // THIS IS NOT A PRODUCTION LEVEL SNIPPET
+
+                    this._trustVault.Add("miner_test", File.ReadAllText("miner_pubKey.pem"));
+                    this._trustVault.Add("node_test", File.ReadAllText("pubKey.pem"));
+
+                    // --------------------------------------
+
+                    this._operation = new Operations.OperationTransaction("", this._trustVault.ToJson(), "d3vil401");
+
+                    this._trustVault = null;
 
                     break;
                 //case IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK:
@@ -37,7 +50,15 @@ namespace Nordic.Blockchain
             switch (_opc) {
                 case IOperation.OPERATION_TYPE.OPERATION_GENESIS_BLOCK:
 
-                    this._operation = new Operations.OperationTransaction("", "Let there be light and JSON", "d3vil401");
+                    // THIS IS NOT A PRODUCTION LEVEL SNIPPET
+
+                    this._trustVault.Add("miner_test", File.ReadAllText("miner_pubKey.pem"));
+                    this._trustVault.Add("node_test", File.ReadAllText("pubKey.pem"));
+
+                    // --------------------------------------
+                    this._operation = new Operations.OperationTransaction("", this._trustVault.ToJson(), "d3vil401");
+
+                    this._trustVault = null;
 
                     break;
                 //case IOperation.OPERATION_TYPE.BROADCAST_NEW_BLOCK:
