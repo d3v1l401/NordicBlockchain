@@ -43,7 +43,7 @@ namespace Nordic.Network.Client
                     break;
                 case IOperation.OPERATION_TYPE.OPERATION_STATS_ACK:
 
-                    var stats = _class.Result.OperationData.FromBase64().ToStringBuffer().Decompress().Split("|");
+                    var stats = _class.Result.OperationData.FromBase64().ToStringBuffer().Decompress().Split("&");
                     if (stats.Length == 2)
                     {
                         Console.WriteLine("There are " + stats[1] + " pending operations, last block info:");
@@ -54,9 +54,9 @@ namespace Nordic.Network.Client
                     break;
                 case IOperation.OPERATION_TYPE.TRANSACTION_STATUS_ACK:
 
-                    var _txDump = _class.Result.OperationData.Split('|');
+                    var _txDump = _class.Result.OperationData.Split('&');
                     
-                    Console.WriteLine("Transaction details:" + _txDump[0]);
+                    Console.WriteLine("Transaction details: \n" + _txDump[0]);
                     var _detail = int.Parse(_txDump[1]) >= 1 ? "Registered" : "Awaiting votes";
                     Console.WriteLine("Current votes: " + _txDump[1] + " (" + _detail + ")");
 

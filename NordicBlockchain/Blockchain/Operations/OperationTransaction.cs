@@ -19,7 +19,7 @@ namespace Nordic.Blockchain.Operations
 
         private int         _confirmCounter     = 0;
         private string      _txIdentifier       = string.Empty;
-        private DateTime    _queueDate          = DateTime.Now;
+        private DateTime    _queueDate          = DateTime.Now.Date;
 
         public DateTime GetQueueDate()
             => this._queueDate;
@@ -33,7 +33,8 @@ namespace Nordic.Blockchain.Operations
             base.Signature = _signature;
 
             Sha256 _sha = new Sha256();
-            _sha.Enqueue((_author + "-" + _signature + "-" + this._queueDate.ToString()).ToByteArray());
+            var _date = this._queueDate.ToString("d/M/yyyy");
+            _sha.Enqueue((_author + "-" + _signature + "-" + _date).ToByteArray());
             this._txIdentifier = _sha.Finalize().ToBase64();
 
             // Auto-determine type & assign proper ID.

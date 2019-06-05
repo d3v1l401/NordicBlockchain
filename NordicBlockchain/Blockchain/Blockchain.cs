@@ -148,14 +148,19 @@ namespace Nordic.Blockchain
                })
                .Case<OperationTxStatus> (async action => {
 
+                   if (string.IsNullOrEmpty(_operation.OperationData))
+                       return;
+
                    var _res = await this.getTxStatus(_operation.OperationData);
-                   var _resp = new ClmManager(new OperationTxStatusAck("node_test", _res.ToString() + "|" + _res.Votes(), ServerAuthenticator.Sign(_res.ToString())));
-                   _responseBuffer = _resp.GetBuffer().Result.ToBase64();
+                   if (_res != null) {
+                       var _resp = new ClmManager(new OperationTxStatusAck("node_test", _res.ToString() + "&" + _res.Votes(), ServerAuthenticator.Sign(_res.ToString())));
+                       _responseBuffer = _resp.GetBuffer().Result.ToBase64();
+                   }
 
                })
                .Case<OperationStatsRequest> ( action => {
 
-                   var data = (this.LastBlock().ToString() + "|" + this.PendingOperations.Count).Compress().ToByteArray().ToBase64();
+                   var data = (this.LastBlock().ToString() + "&" + this.PendingOperations.Count).Compress().ToByteArray().ToBase64();
                    var _resp = new ClmManager(new OperationStatsAck("node_test", data, "none"));
                    _responseBuffer = _resp.GetBuffer().Result.ToBase64();
 
@@ -163,10 +168,10 @@ namespace Nordic.Blockchain
                .Case<OperationPendingRequest> ( action => {
 
                    // We're just forcing the existance of a transaction by me, for the pure reason we are testing this.
-                   Security.Cryptography.RSA _rsa = new Security.Cryptography.RSA(File.ReadAllText("user_privKeyOut.pem"), File.ReadAllText("user_pubKey.pem"));
+                   //Security.Cryptography.RSA _rsa = new Security.Cryptography.RSA(File.ReadAllText("user_privKeyOut.pem"), File.ReadAllText("user_pubKey.pem"));
                    // Tx from me to Poul of 3200.0 kr, assets are not be kept private from miners, miner only need to know who's involved.
                    // This is not the best practice, but it's quick for our needs.
-                   this.ProcessOperation(new OperationTransaction("Luca-Poul", "3200.0", _rsa.Sign("Luca|Poul")));
+                   //this.ProcessOperation(new OperationTransaction("Luca|Poul", "3200.0", _rsa.Sign("Luca|Poul")));
 
 
                    // Get oldest pending operation, prioritizing longer awaiting operations.

@@ -25,17 +25,18 @@ namespace NordicMiner
             if (_op != null) {
                 Console.WriteLine("We have a transaction to check!");
                 var _tokens = _op.OperationData.Split('|');
-                if (_tokens.Length == 5) {
+                if (_tokens.Length == 6) {
 
                     var _author = _tokens[0];
-                    var _signature = _tokens[1];
-                    var _queueDate = DateTime.FromOADate(Double.Parse(_tokens[2]));
-                    var _type = _tokens[3];
-                    var _sent = DateTime.FromOADate(Double.Parse(_tokens[4]));
+                    var _receiver = _tokens[1];
+                    var _signature = _tokens[2];
+                    var _queueDate = DateTime.FromOADate(Double.Parse(_tokens[3]));
+                    var _type = _tokens[4];
+                    var _sent = DateTime.FromOADate(Double.Parse(_tokens[5]));
 
                     var _span = DateTime.UtcNow - _sent;
 
-                    Console.WriteLine("Transaction by [ " + _author + " ] queued " + _queueDate.ToString() + " and on hold here since " + _sent.ToString());
+                    Console.WriteLine("Transaction [ by " + _author + " for " + _receiver + "] queued " + _queueDate.ToString() + " and on hold here since " + _sent.ToString());
 
                     // Max 12 hours to be processed, otherwise it gets removed.
                     if (_span.TotalHours >= 12) {
@@ -50,7 +51,8 @@ namespace NordicMiner
                                 // And the operation is effectively a transaction request.
 
                                 Sha256 _sha = new Sha256();
-                                _sha.Enqueue((_author + "-" + _signature + "-" + _queueDate.ToString()).ToByteArray());
+                                var _date = _queueDate.ToString("d/M/yyyy");
+                                _sha.Enqueue((_author + "|" + _receiver + "-" + _signature + "-" + _date).ToByteArray());
                                 var _txId = _sha.Finalize().ToBase64();
 
                                 _lastTxId = _txId;
@@ -76,6 +78,7 @@ namespace NordicMiner
             _crypto = new RSA(File.ReadAllText("miner_privKeyOut.pem"), File.ReadAllText("miner_pubKey.pem"));
             if (_crypto == null)
                 throw new Exception("Could not initialize RSA");
+            RSA _userRsa = new RSA(File.ReadAllText("user_privKeyOut.pem"), File.ReadAllText("user_pubKey.pem"));
 
             ClientAuthenticator.Initialize("miner_pubKey.pem", "miner_privKeyOut.pem", "");
             ClientAuthenticator.Add("node", File.ReadAllText("node_pubKey.pem"));
@@ -102,6 +105,15 @@ namespace NordicMiner
                 return;
             }
 
+            Console.WriteLine("Impersonating user, create a transaction...");
+            var _tx = new OperationTransaction("Luca|Max", "1337.0", _userRsa.Sign("Luca|Max"));
+            Console.WriteLine(_tx.ToString());
+            _clm = new ClmManager(_tx);
+            _lastTxId = _tx.GetIdentifier();
+            _buff = _clm.GetBuffer().Result.ToBase64();
+            _client.Send(_defaultEndpoint, _buff);
+
+            await Task.Delay(3000);
 
             Console.WriteLine("Asking for something to do...");
             // Request a pending operation (transaction), process it and report to node.
